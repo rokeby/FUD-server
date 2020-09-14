@@ -3,41 +3,47 @@ import csv
 import re
 import time
 import threading
+import storm_classifier
+import random
 
 #globals
 global name, yr, num
 
-classifier = {
-	'TD': 'Tropical cyclone of tropical depression intensity',
-	'TS': 'Tropical cyclone of tropical storm intensity',
-	'HU': 'Tropical cyclone of hurricane intensity',
-	'EX': 'Extratropical cyclone',
-	'SD': 'Subtropical cyclone of subtropical depression intensity',
-	'SS': 'Subtropical cyclone of subtropical storm intensity',
-	'LO': 'Low that is neither a tropical cyclone, a subtropical cyclone, nor an extratropical cyclone',
-	'WV': 'Tropical Wave',
-	'DB': 'Disturbance'
-}
+risk = 0.0
+agents = []
 
 class Agent:
 	funds = 10000
 
-	def __init__(self, name='', i=''):
-		self.name = r
+	def __init__(self, name='', risk_appetite = 0.0):
+		self.name = name
+		self.risk_appetite = risk_appetite
 
-	def trade(self):
-		print('trading')
+	def trade(self, risk=0.0):
+		if self.risk_appetite < risk:
+			print(self.name, "selling")
 
 
 def createAgents():
+	global agents
 	print('creating agents')
+	with open('names.txt','r') as f_open:
+		names = f_open.read()
+		for name in names.split('\n'):
+			risk_appetite = round(0.9-random.random()*0.5, 2)
+			agents.append(Agent(name, risk_appetite))
+
 
 def trading():
+	global agents, risk
 	while True:
-		print('trading')
-		time.sleep(1)
+		for agent in agents:
+			agent.trade(risk)
+		time.sleep(2)
+
 
 def ticker():
+	global risk
 	with open('hurdat-mini.csv') as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
@@ -53,15 +59,16 @@ def ticker():
 				date = datetime.strptime(row[0], "%Y%m%d")
 				t = '0000' if row[1] == '0' else row[1]
 				t = t[:-2] + ':' + t[-2:]
-				cat = classifier[row[3].strip()]
+				cat = storm_classifier.classifier[row[3].strip()]
 				print('the time is', t, 'on', date.strftime('%m-%d'))
 				print('location', row[4], row[5])
 				print('max wind speed is', row[6], 'knots')
-				print('this storm is now classified as a', cat)
+				print('this storm is now classified as a', cat['description'])
+				risk = cat['risk']
 				if row[2].strip() == 'L':
 					print(name, 'has made landfall')
 				print('')
-			time.sleep(10)
+			time.sleep(2)
 
 
 if __name__ == "__main__":
@@ -72,6 +79,8 @@ if __name__ == "__main__":
 		mainLoop = threading.Thread(target=ticker)
 		mainLoop.daemon=True
 		mainLoop.start()
+
+		time.sleep(1)
 
 		trading = threading.Thread(target=trading, args=( ))
 		trading.daemon=True
