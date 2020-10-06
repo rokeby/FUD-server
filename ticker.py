@@ -5,12 +5,14 @@ import time
 import threading
 import storm_classifier
 import random
+import server
 
 #globals
 global name, yr, num
 
 risk = 0.0
 agents = []
+chat = []
 
 class Agent:
 	funds = 10000
@@ -20,9 +22,16 @@ class Agent:
 		self.risk_appetite = risk_appetite
 
 	def trade(self, risk=0.0):
+		global chat
 		if self.risk_appetite < risk:
-			print(self.name, "selling")
+			chat_string = self.name + "selling"
+			chat.append(chat_string)
 
+
+def chatBuf():
+	global chat
+	print('getting chat from ticker', chat)
+	return chat
 
 def createAgents():
 	global agents
@@ -43,31 +52,31 @@ def trading():
 
 
 def ticker():
-	global risk
+	global risk, chat
 	with open('hurdat-mini.csv') as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
 			if row[1][0].isspace():
 				name = row[1].strip()
-				print('\n\n#####NEW STORM')
-				print('\nhurricane', name)
 				num = row[0][2:-4]
 				yr = row[0][-4:]
-				print('year:', yr, ' number:', num, '\n')
+				chat_string = '\n\n#####NEW STORM\nhurricane' + name + '\nyear:' + yr + ' number:' + num + '\n'
+				chat.append(chat_string)
 			else:
-				print('\n\n#####UPDATE:')
+				#print('\n\n#####UPDATE:')
 				date = datetime.strptime(row[0], "%Y%m%d")
 				t = '0000' if row[1] == '0' else row[1]
 				t = t[:-2] + ':' + t[-2:]
 				cat = storm_classifier.classifier[row[3].strip()]
-				print('the time is', t, 'on', date.strftime('%m-%d'))
-				print('location', row[4], row[5])
-				print('max wind speed is', row[6], 'knots')
-				print('this storm is now classified as a', cat['description'])
+				#print('the time is', t, 'on', date.strftime('%m-%d'))
+				#print('location', row[4], row[5])
+				#print('max wind speed is', row[6], 'knots')
+				chat_string = 'this storm is now classified as a' + cat['description']
+				chat.append(chat_string)
 				risk = cat['risk']
 				if row[2].strip() == 'L':
 					print(name, 'has made landfall')
-				print('')
+				#print('')
 			time.sleep(2)
 
 
@@ -75,7 +84,12 @@ if __name__ == "__main__":
 	print("welcome to fud")
 	createAgents()
 
+
 	try:
+		server = threading.Thread(target=server.run)
+		server.daemon=True
+		server.start()
+
 		mainLoop = threading.Thread(target=ticker)
 		mainLoop.daemon=True
 		mainLoop.start()
