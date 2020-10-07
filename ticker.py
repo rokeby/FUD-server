@@ -10,6 +10,8 @@ import random
 global name, yr, num
 
 risk = 0.0
+market_initial = 600
+market = 600
 agents = []
 
 class Agent:
@@ -18,6 +20,8 @@ class Agent:
 	def __init__(self, name='', risk_appetite = 0.0):
 		self.name = name
 		self.risk_appetite = risk_appetite
+		self.buy_limit = market_initial + 50*(1-risk_appetite) + 100 - random.random()*200
+		self.sell_limit = market_initial - 50*(1-risk_appetite) + 100 - random.random()*200
 
 	def trade(self, risk=0.0):
 		if self.risk_appetite < risk:
@@ -34,8 +38,13 @@ def createAgents():
 			agents.append(Agent(name, risk_appetite))
 
 
+
+def updateMarket():
+	global market, risk
+	if 1-risk
+
 def trading():
-	global agents, risk
+	global agents, risk, market
 	while True:
 		for agent in agents:
 			agent.trade(risk)
