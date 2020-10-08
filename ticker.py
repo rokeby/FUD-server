@@ -91,7 +91,6 @@ def ticker():
 				name = row[1].strip()
 				num = row[0][2:-4]
 				yr = row[0][-4:]
-				#chat_string = '#####NEW STORM hurricane ' + name + '\nyear:' + yr + ' number:' + num + '\n'
 				updateChat(sysName, '#####NEW STORM hurricane ' + name)
 				updateChat(sysName, 'we are in year ' + yr)
 			else:
