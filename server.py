@@ -1,11 +1,14 @@
 from flask import Flask
+from flask_cors import CORS
 import sqlite3
 import json
 
 app = Flask(__name__)
+cors = CORS(app)
 
 @app.route("/chat", methods=["GET"])
 def getChat():
+	print('http request from gary')
 	conn = None
 	chat = []
 	try:
@@ -14,7 +17,6 @@ def getChat():
 		with conn:
 			chatBuf = c.execute('''SELECT * FROM (SELECT * FROM chat ORDER BY id DESC LIMIT 10)Var1 ORDER BY id ASC''')
 			for row in chatBuf:
-				print(row[2] + ':', row[3])
 				chat.append({
 					'timestamp': row[1],
 					'agent': row[2],
