@@ -6,6 +6,7 @@ import threading
 import storm_classifier
 import random
 import server
+import sqlite3
 
 #globals
 global name, yr, num
@@ -14,7 +15,8 @@ risk = 0.0
 market_initial = 600
 market = 600
 agents = []
-chat = []
+db_file = './fud.db'
+sysName = 'system'
 
 class Agent:
 	funds = 10000
@@ -26,16 +28,24 @@ class Agent:
 		self.sell_limit = market_initial - 50*(1-risk_appetite) + 100 - random.random()*200
 
 	def trade(self, risk=0.0):
-		global chat
 		if self.risk_appetite < risk:
-			chat_string = self.name + "selling"
-			chat.append(chat_string)
+			chat_string = "selling"
+			updateChat(self.name, chat_string)
 
 
-def chatBuf():
-	global chat
-	print('getting chat from ticker', chat)
-	return chat
+def updateChat(agent, chat_string):
+	global db_file
+	conn = None
+	try:
+		conn = sqlite3.connect(db_file)
+		c = conn.cursor()
+		with conn:
+			c.execute("INSERT INTO chat (user,chatString) VALUES (?,?)", (agent, chat_string))
+	except sqlite3.Error as e:
+		print(e)
+	finally:
+		if conn:
+			conn.close()
 
 def createAgents():
 	global agents
@@ -46,11 +56,23 @@ def createAgents():
 			risk_appetite = round(0.9-random.random()*0.5, 2)
 			agents.append(Agent(name, risk_appetite))
 
-
+def initDatabase(db_file):
+	conn = None
+	try:
+		conn = sqlite3.connect(db_file)
+		c=conn.cursor()
+		c.execute('''CREATE TABLE chat
+			(id INTEGER PRIMARY KEY, 'timestamp' DATETIME DEFAULT CURRENT_TIMESTAMP, user TEXT, chatString TEXT)''')
+		print(sqlite3.version)
+	except sqlite3.Error as e:
+		print(e)
+	finally:
+		if conn:
+			conn.close()
 
 def updateMarket():
 	global market, risk
-	if 1-risk
+	print('updating market')
 
 def trading():
 	global agents, risk, market
@@ -61,7 +83,7 @@ def trading():
 
 
 def ticker():
-	global risk, chat
+	global risk, sysName
 	with open('hurdat-mini.csv') as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
@@ -69,30 +91,30 @@ def ticker():
 				name = row[1].strip()
 				num = row[0][2:-4]
 				yr = row[0][-4:]
-				chat_string = '\n\n#####NEW STORM\nhurricane' + name + '\nyear:' + yr + ' number:' + num + '\n'
-				chat.append(chat_string)
+				#chat_string = '#####NEW STORM hurricane ' + name + '\nyear:' + yr + ' number:' + num + '\n'
+				updateChat(sysName, '#####NEW STORM hurricane ' + name)
+				updateChat(sysName, 'we are in year ' + yr)
 			else:
 				#print('\n\n#####UPDATE:')
 				date = datetime.strptime(row[0], "%Y%m%d")
 				t = '0000' if row[1] == '0' else row[1]
 				t = t[:-2] + ':' + t[-2:]
 				cat = storm_classifier.classifier[row[3].strip()]
-				#print('the time is', t, 'on', date.strftime('%m-%d'))
-				#print('location', row[4], row[5])
-				#print('max wind speed is', row[6], 'knots')
-				chat_string = 'this storm is now classified as a' + cat['description']
-				chat.append(chat_string)
+				updateChat(sysName, 'the time is ' + t+ ' on '+ date.strftime('%m-%d'))
+				updateChat(sysName, 'location ' + row[4]+ row[5])
+				updateChat(sysName, 'max wind speed is '+ row[6]+ ' knots')
+				updateChat(sysName, 'this storm is now classified as a ' + cat['description'])
 				risk = cat['risk']
 				if row[2].strip() == 'L':
-					print(name, 'has made landfall')
+					updateChat(sysName, name + ' has made landfall')
 				#print('')
 			time.sleep(2)
 
 
 if __name__ == "__main__":
 	print("welcome to fud")
+	#initDatabase("./fud.db")
 	createAgents()
-
 
 	try:
 		server = threading.Thread(target=server.run)
