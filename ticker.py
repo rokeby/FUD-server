@@ -61,7 +61,9 @@ def initDatabase(db_file):
 	try:
 		conn = sqlite3.connect(db_file)
 		c=conn.cursor()
-		c.execute('''CREATE TABLE chat
+		#remove this before running on final version
+		c.execute('''DROP TABLE IF EXISTS chat''')
+		c.execute('''CREATE TABLE IF NOT EXISTS chat
 			(id INTEGER PRIMARY KEY, 'timestamp' DATETIME DEFAULT CURRENT_TIMESTAMP, user TEXT, chatString TEXT)''')
 		print(sqlite3.version)
 	except sqlite3.Error as e:
@@ -112,7 +114,7 @@ def ticker():
 
 if __name__ == "__main__":
 	print("welcome to fud")
-	#initDatabase("./fud.db")
+	initDatabase("./fud.db")
 	createAgents()
 
 	try:
