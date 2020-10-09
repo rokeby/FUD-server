@@ -2,7 +2,9 @@ from flask import Flask
 from flask_cors import CORS
 import sqlite3
 import json
+import os
 
+dirname = os.path.dirname(__file__)
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -12,7 +14,7 @@ def getChat():
 	conn = None
 	chat = []
 	try:
-		conn = sqlite3.connect('./fud.db')
+		conn = sqlite3.connect(os.path.join(dirname, 'fud.db'))
 		c = conn.cursor()
 		with conn:
 			chatBuf = c.execute('''SELECT * FROM (SELECT * FROM chat ORDER BY id DESC LIMIT 10)Var1 ORDER BY id ASC''')

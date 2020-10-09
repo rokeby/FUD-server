@@ -7,6 +7,10 @@ import storm_classifier
 import random
 import server
 import sqlite3
+import os
+
+dirname = os.path.dirname(__file__)
+print('dirname is', dirname)
 
 #globals
 global name, yr, num
@@ -15,7 +19,7 @@ risk = 0.0
 market_initial = 600
 market = 600
 agents = []
-db_file = './fud.db'
+db_file = os.path.join(dirname, 'fud.db')
 sysName = 'system'
 
 class Agent:
@@ -50,7 +54,8 @@ def updateChat(agent, chat_string):
 def createAgents():
 	global agents
 	print('creating agents')
-	with open('names.txt','r') as f_open:
+
+	with open(os.path.join(dirname, 'names.txt'),'r') as f_open:
 		names = f_open.read()
 		for name in names.split('\n'):
 			risk_appetite = round(0.9-random.random()*0.5, 2)
@@ -86,7 +91,7 @@ def trading():
 
 def ticker():
 	global risk, sysName
-	with open('hurdat-mini.csv') as csvfile:
+	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
 		reader = csv.reader(csvfile)
 		for row in reader:
 			if row[1][0].isspace():
@@ -114,7 +119,7 @@ def ticker():
 
 if __name__ == "__main__":
 	print("welcome to fud")
-	initDatabase("./fud.db")
+	initDatabase(os.path.join(dirname, "fud.db"))
 	createAgents()
 
 	try:
