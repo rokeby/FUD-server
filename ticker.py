@@ -4,91 +4,40 @@ import re
 import time
 import threading
 import storm_classifier
-import random
 import server
-import sqlite3
 import os
+
+#submodules
+import chat
+import market
 
 dirname = os.path.dirname(__file__)
 
-#globals
-global name, yr, num
-
 risk = 0.0
-market_initial = 600
-market = 600
-agents = []
 db_file = os.path.join(dirname, 'fud.db')
 sysName = 'system'
 
-class Agent:
-	funds = 10000
+#variables that need to be global
+#risk
 
-	def __init__(self, name='', risk_appetite = 0.0):
-		self.name = name
-		self.risk_appetite = risk_appetite
-		self.buy_limit = market_initial + 50*(1-risk_appetite) + 100 - random.random()*200
-		self.sell_limit = market_initial - 50*(1-risk_appetite) + 100 - random.random()*200
+###THREAD B
 
-	def trade(self, risk=0.0):
-		if self.risk_appetite < risk:
-			chat_string = "selling"
-			updateChat(self.name, chat_string)
-
-
-def updateChat(agent, chat_string):
-	global db_file
-	conn = None
-	try:
-		conn = sqlite3.connect(db_file)
-		c = conn.cursor()
-		with conn:
-			c.execute("INSERT INTO chat (user,chatString) VALUES (?,?)", (agent, chat_string))
-	except sqlite3.Error as e:
-		print(e)
-	finally:
-		if conn:
-			conn.close()
-
-def createAgents():
-	global agents
-	print('creating agents')
-
-	with open(os.path.join(dirname, 'names.txt'),'r') as f_open:
-		names = f_open.read()
-		for name in names.split('\n'):
-			risk_appetite = round(0.9-random.random()*0.5, 2)
-			agents.append(Agent(name, risk_appetite))
-
-def initDatabase(db_file):
-	conn = None
-	try:
-		conn = sqlite3.connect(db_file)
-		c=conn.cursor()
-		#remove this before running on final version
-		c.execute('''DROP TABLE IF EXISTS chat''')
-		c.execute('''CREATE TABLE IF NOT EXISTS chat
-			(id INTEGER PRIMARY KEY, 'timestamp' DATETIME DEFAULT CURRENT_TIMESTAMP, user TEXT, chatString TEXT)''')
-		print(sqlite3.version)
-	except sqlite3.Error as e:
-		print(e)
-	finally:
-		if conn:
-			conn.close()
-
-def updateMarket():
-	global market, risk
-	print('updating market')
-
+# this thread controls the market and chat. it takes the risk values
+# and tranche sales from the 
 def trading():
-	global agents, risk, market
+	global risk
 	while True:
-		for agent in agents:
-			agent.trade(risk)
+		market.agent_trade(risk)
 		time.sleep(2)
 
 
-def ticker():
+###THREAD A
+
+# this thread will read the generated geoJSON file
+# this communicates the risk model at each step and gives hurricane
+# commentary. At various points, this thread triggers the release
+# of tranches of hurricane bonds
+def reports():
 	global risk, sysName
 	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
 		reader = csv.reader(csvfile)
@@ -98,39 +47,44 @@ def ticker():
 					name = row[1].strip()
 					num = row[0][2:-4]
 					yr = row[0][-4:]
-					updateChat(sysName, '#####NEW STORM hurricane ' + name)
-					updateChat(sysName, 'we are in year ' + yr)
+					chat.update(sysName, '#####NEW STORM hurricane ' + name)
+					chat.update(sysName, 'we are in year ' + yr)
 				else:
 					date = datetime.strptime(row[0], "%Y%m%d")
 					t = '0000' if row[1] == '0' else row[1]
 					t = t[:-2] + ':' + t[-2:]
 					cat = storm_classifier.classifier[row[3].strip()]
-					updateChat(sysName, 'the time is ' + t+ ' on '+ date.strftime('%m-%d'))
-					updateChat(sysName, 'location ' + row[4]+ row[5])
-					updateChat(sysName, 'max wind speed is '+ row[6]+ ' knots')
-					updateChat(sysName, 'this storm is now classified as a ' + cat['description'])
+					chat.update(sysName, 'the time is ' + t+ ' on '+ date.strftime('%m-%d'))
+					chat.update(sysName, 'location ' + row[4]+ row[5])
+					chat.update(sysName, 'max wind speed is '+ row[6]+ ' knots')
+					chat.update(sysName, 'this storm is now classified as a ' + cat['description'])
 					risk = cat['risk']
 					if row[2].strip() == 'L':
-						updateChat(sysName, name + ' has made landfall')
+						chat.update(sysName, name + ' has made landfall')
 				time.sleep(2)
 
 
 if __name__ == "__main__":
 	print("#### welcome to fud #####")
-	initDatabase(os.path.join(dirname, "fud.db"))
-	createAgents()
+
+	#remove this before running on final version
+	chat.init_db()
+	market.create_agents()
 
 	try:
+		#start server
 		server = threading.Thread(target=server.run)
 		server.daemon=True
 		server.start()
 
-		mainLoop = threading.Thread(target=ticker)
+		#start hurricane timer
+		mainLoop = threading.Thread(target=reports)
 		mainLoop.daemon=True
 		mainLoop.start()
 
 		time.sleep(1)
 
+		#start the market
 		trading = threading.Thread(target=trading, args=( ))
 		trading.daemon=True
 		trading.start()
