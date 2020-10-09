@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 import sqlite3
 import json
@@ -7,6 +7,27 @@ import os
 dirname = os.path.dirname(__file__)
 app = Flask(__name__)
 cors = CORS(app)
+
+
+@app.route("/userchat", methods=["POST"])
+def postChat():
+	user = request.form['user']
+	chat_string = request.form['chat_string']
+	print('adding to chat')
+	conn = None
+	chat = []
+	try:
+		conn = sqlite3.connect(os.path.join(dirname, 'fud.db'))
+		c = conn.cursor()
+		with conn:
+			c.execute("INSERT INTO chat (user,chatString) VALUES (?,?)", (user, chat_string))
+	except sqlite3.Error as e:
+		print(e)
+	finally:
+		if conn:
+			conn.close()
+	return 'chat'
+
 
 @app.route("/chat", methods=["GET"])
 def getChat():
