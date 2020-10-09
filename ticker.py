@@ -10,7 +10,6 @@ import sqlite3
 import os
 
 dirname = os.path.dirname(__file__)
-print('dirname is', dirname)
 
 #globals
 global name, yr, num
@@ -93,32 +92,31 @@ def ticker():
 	global risk, sysName
 	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
 		reader = csv.reader(csvfile)
-		for row in reader:
-			if row[1][0].isspace():
-				name = row[1].strip()
-				num = row[0][2:-4]
-				yr = row[0][-4:]
-				updateChat(sysName, '#####NEW STORM hurricane ' + name)
-				updateChat(sysName, 'we are in year ' + yr)
-			else:
-				#print('\n\n#####UPDATE:')
-				date = datetime.strptime(row[0], "%Y%m%d")
-				t = '0000' if row[1] == '0' else row[1]
-				t = t[:-2] + ':' + t[-2:]
-				cat = storm_classifier.classifier[row[3].strip()]
-				updateChat(sysName, 'the time is ' + t+ ' on '+ date.strftime('%m-%d'))
-				updateChat(sysName, 'location ' + row[4]+ row[5])
-				updateChat(sysName, 'max wind speed is '+ row[6]+ ' knots')
-				updateChat(sysName, 'this storm is now classified as a ' + cat['description'])
-				risk = cat['risk']
-				if row[2].strip() == 'L':
-					updateChat(sysName, name + ' has made landfall')
-				#print('')
-			time.sleep(2)
+		while True:
+			for row in reader:
+				if row[1][0].isspace():
+					name = row[1].strip()
+					num = row[0][2:-4]
+					yr = row[0][-4:]
+					updateChat(sysName, '#####NEW STORM hurricane ' + name)
+					updateChat(sysName, 'we are in year ' + yr)
+				else:
+					date = datetime.strptime(row[0], "%Y%m%d")
+					t = '0000' if row[1] == '0' else row[1]
+					t = t[:-2] + ':' + t[-2:]
+					cat = storm_classifier.classifier[row[3].strip()]
+					updateChat(sysName, 'the time is ' + t+ ' on '+ date.strftime('%m-%d'))
+					updateChat(sysName, 'location ' + row[4]+ row[5])
+					updateChat(sysName, 'max wind speed is '+ row[6]+ ' knots')
+					updateChat(sysName, 'this storm is now classified as a ' + cat['description'])
+					risk = cat['risk']
+					if row[2].strip() == 'L':
+						updateChat(sysName, name + ' has made landfall')
+				time.sleep(2)
 
 
 if __name__ == "__main__":
-	print("welcome to fud")
+	print("#### welcome to fud #####")
 	initDatabase(os.path.join(dirname, "fud.db"))
 	createAgents()
 
