@@ -30,31 +30,41 @@ from geopy import distance
 from storm_classifier import classifier
 
 
-def calculateRisk(lat, lon)
+def calculateRisk(lat, lon, name):
 	center_point = [{'lat': lat, 'lng': lon}]
-	radius = 5 # in kilometer
+	big_rad = 250 # in kilometer
+	small_rad = 100 # in kilometer
+	mini_rad = 10
 	with open('cities_pop.csv', newline='') as csvfile:
 		cities = csv.reader(csvfile, delimiter=',')
 		for row in cities:
-			test_point = 
-			center_point_tuple = tuple(center_point[0].values()) # (-7.7940023, 110.3656535)
-			test_point_tuple = tuple(test_point[0].values()) # (-7.79457, 110.36563)
+			#key Country,City,AccentCity,Region,Population,Latitude,Longitude
+			test_point = [{'lat': float(row[5]), 'lng': float(row[6])}]
+			center_point_tuple = tuple(center_point[0].values())
+			test_point_tuple = tuple(test_point[0].values())
 
 			dis = distance.distance(center_point_tuple, test_point_tuple).km
-			print("Distance: {}".format(dis)) # Distance: 0.0628380925748918
 
-			if dis <= radius:
-				print("{} point is inside the {} km radius from {} coordinate".format(test_point_tuple, radius, center_point_tuple))
-			else:
-				print("{} point is outside the {} km radius from {} coordinate".format(test_point_tuple, radius, center_point_tuple))
+			if dis <= 1:
+				print('########### hurricane', name, 'has hit', row[1])
+
+			elif dis <= mini_rad:
+				print(row[1] + ",", row[0], "is within", str(mini_rad) + "km of", name)
+
+			elif dis <= small_rad:
+				print(row[1] + ",", row[0], "is within", str(small_rad) + "km of", name)
+
+			elif dis <= big_rad:
+				print(row[1] + ",", row[0], "is within", str(big_rad) + "km of", name)
 
 
 if __name__ == "__main__":
 	hurricane = []
 	list = []
 	name='ABLE'
-	num=0
+	num=1
 
+	print(name, '-- hurricane number', num)
 	with open('hurdat.csv', newline='') as csvfile:
 		data = csv.reader(csvfile, delimiter=',')
 		# print(data)
@@ -63,7 +73,7 @@ if __name__ == "__main__":
 		for row in data:
 			old.append(row)
 
-	for row in old[1:]:
+	for index, row in enumerate(old[1:], start=1):
 		coord=[]
 		if row[4] != '':
 			if 'W' in row[5]:
@@ -78,10 +88,10 @@ if __name__ == "__main__":
 				coord.append(-float(re.sub('S', '', row[4])))
 			else: break
 
-			risk = calculateRisk(coord);
+			risk = calculateRisk(coord[1], coord[0], name);
 
 			date = datetime.strptime(row[0], "%Y%m%d")
-			point = Feature(geometry=Point(coord[1], coord[0]), 
+			point = Feature(geometry=Point(coord), 
 				properties={
 					'class': row[3].strip(), 
 					'date': date.strftime('%m-%d-%Y'),
@@ -96,10 +106,10 @@ if __name__ == "__main__":
 					'geoJSON': FeatureCollection(hurricane),
 					'metadata': {'number': num, 'name': name }
 				})
-			print(name, num)
 			name = row[1].strip()
 			hurricane=[]
 			num = num+1
+			print(name, '-- hurricane number', num)
 			first_step=True
 
 
