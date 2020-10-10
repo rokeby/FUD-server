@@ -6,6 +6,7 @@ import os
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__)
+
 cors = CORS(app)
 
 
@@ -31,7 +32,6 @@ def postChat():
 
 @app.route("/chat", methods=["GET"])
 def getChat():
-	print('http request from gary')
 	conn = None
 	chat = []
 	try:
