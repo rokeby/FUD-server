@@ -16,18 +16,19 @@ dirname = os.path.dirname(__file__)
 risk = 0.0
 db_file = os.path.join(dirname, 'fud.db')
 sysName = 'fud'
+time_remaining = 20
 
 #variables that need to be global
 #risk
 
 ###THREAD B
 
-# this thread controls the market and chat. it takes the risk values
+# this thread controls the main loop of the market and chat. it takes the risk values
 # and tranche sales from the hurricane
 def trading():
 	global risk
 	while True:
-		market.agent_trade(risk)
+		market.agent_trade(risk, time_remaining)
 		time.sleep(2)
 
 
@@ -38,12 +39,12 @@ def trading():
 # commentary. At various points, this thread triggers the release
 # of tranches of hurricane bonds
 def ticker():
-	global risk, sysName
+	global risk, sysName, time_remaining
 	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
 		reader = csv.reader(csvfile)
 		while True:
 			for row in reader:
-				reports.track(row, sysName)
+				time_remaining = reports.track(row, sysName, time_remaining)
 				risk = reports.get_risk(row, risk)
 				time.sleep(2)
 
