@@ -1,19 +1,25 @@
 import sqlite3
 import os
 import chat
+import math
 import random
 
 dirname = os.path.dirname(__file__)
+agents = []
 
 #market sets price based on value?
 #value of a bid vs value of an ask
 class Market:
+	global agents
 	bonds=[]
 	bid_list=[]
 	ask_list=[]
 
 	def __init__(self, start_price):
 		self.price = start_price
+
+	def spread():
+		print('calculating spread')
 
 market = Market(100)
 
@@ -25,7 +31,7 @@ class Bond:
 		self.premium = premium
 
 	def est_return(self, time_remaining):
-		est = ((self.initial_price - self.price) + time_remaining*self.premium)/self.price
+		est = ((self.initial_price - self.price) + time_remaining*self.premium)/self.price + 1
 		return est
 
 	def update_price(self, p):
@@ -34,16 +40,18 @@ class Bond:
 #volume is in dollars, est return is the number of
 #dollars you get back for what you put in
 class Bid:
-	def __init__(self, desired_return, vol):
+	def __init__(self, desired_return, vol, bidder):
 		self.desired_return = desired_return
 		self.vol = vol
+		self.bidder = bidder
 
 
 class Ask:
-	def __init__(self, est_return, price, num):
+	def __init__(self, est_return, price, num, asker):
 		self.est_return = est_return
 		self.price = price
 		self.num = num
+		self.asker = asker
 
 class Agent:
 	funds = 10000
@@ -58,38 +66,40 @@ class Agent:
 		return self.funds/2
 
 	def trade(self, risk=0.0, time_remaining=12):
+		#initially, reset each time
+		self.bid=None
+		self.ask=None
+
 		if risk > self.risk_mean + 1.5*self.risk_std:
 			chat.update(self.name, "selling")
 			sellNum = len(self.bonds)
 			if sellNum > 0:
-				ask = Ask(bonds[0].est_return(time_remaining), bonds[0].price, sellNum)
-				print(self.name, 'asks', ask.est_return, ask.price, ask.num)
+				self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
+				print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			chat.update(self.name, "buying")
 			desired_return=1.1
-			bid = Bid(desired_return, self.buy_limit())
-			print(self.name, 'bid:', bid.desired_return, bid.vol)
+			self.bid = Bid(desired_return, self.buy_limit(), self.name)
+			print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
 
 	def earnings():
 		print('calculate earnings')
 		#for bond in self.bonds
 		#calculate interest
 
-
-agents = []
-
 def issue_bonds(price, premium, num_bonds):
 	global market
-	for b in num_bonds:
+	for b in range(0, num_bonds):
 		bond = Bond(price, premium)
 		market.bonds.append(bond)
 
 def reset_market():
-	global market, agents
-	#agent bonds to 0
+	global market
 	market.bonds = []
 
+	#shuffle agents so it's not always the same people
+	# at the front of the queue
 	#market bonds to 0
 
 def create_agents():
@@ -110,6 +120,29 @@ def agent_trade(risk, time_remaining):
 	for agent in agents:
 		agent.trade(risk, time_remaining)
 
-def update_market():
-	global risk
-	print('updating market')
+#this could belong to World?
+def calculate_buy_sell_lists():
+	global agents, market
+	market.ask_list = []
+	market.bid_list = []
+
+	for agent in agents:
+		if agent.bid:
+			market.bid_list.append(agent.bid)
+
+		elif agent.ask:
+			market.ask_list.append(agent.ask)
+
+def run_exchange(risk, time_remaining):
+	global agents, market
+	calculate_buy_sell_lists()
+	for bid in market.bid_list:
+		for bond in market.bonds:
+			print('est return is', bond.est_return(time_remaining))
+			if bid.desired_return < bond.est_return(time_remaining) and bond.price < bid.vol:
+				bid.vol = bid.vol-bond.price
+				agent = next((agent for agent in agents if agent.name == bid.bidder), None)
+				print('success, sold bond to ', agent.name, bid.bidder)
+				agent.bonds.append(bond)
+				market.bonds.remove(bond)
+#	for ask in market.ask_list:

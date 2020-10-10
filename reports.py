@@ -11,9 +11,11 @@ name = ''
 def track(row, sysName, time_remaining):
 	global name
 	if row[1][0].isspace():
+		market.reset_market()
 		name = row[1].strip()
 		chat.update(sysName, '#####NEW STORM hurricane ' + name)
 		time_remaining = 20
+		market.issue_bonds(100, 5, 50)
 	else:
 		date = datetime.strptime(row[0], "%Y%m%d")
 		t = '0000' if row[1] == '0' else row[1]

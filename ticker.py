@@ -29,6 +29,7 @@ def trading():
 	global risk
 	while True:
 		market.agent_trade(risk, time_remaining)
+		market.run_exchange(risk, time_remaining)
 		time.sleep(2)
 
 
