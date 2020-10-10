@@ -34,29 +34,20 @@ class Bond:
 #volume is in dollars, est return is the number of
 #dollars you get back for what you put in
 class Bid:
-	def __init__(self, est_return, vol):
-		self.premium = premium
-		self.price = price
+	def __init__(self, desired_return, vol):
+		self.desired_return = desired_return
 		self.vol = vol
-
-	def value(self):
-		return self.premium/self.price
 
 
 class Ask:
-	def __init__(self, premium, price, vol):
-		self.premium = premium
+	def __init__(self, est_return, price, num):
+		self.est_return = est_return
 		self.price = price
-		self.vol = vol
-
-	def value(self):
-		return self.premium/self.price
+		self.num = num
 
 class Agent:
 	funds = 10000
 	bonds=[]
-	bids=[]
-	asks=[]
 
 	def __init__(self, name='', risk_mean=0.0, risk_std=0.05):
 		self.name = name
@@ -69,13 +60,16 @@ class Agent:
 	def trade(self, risk=0.0, time_remaining=12):
 		if risk > self.risk_mean + 1.5*self.risk_std:
 			chat.update(self.name, "selling")
-			sellNum = self.bonds.length
-			#self.asks.append(Ask(bonds[0].est_return(time_remaining), sellNum*bonds[0].price))
+			sellNum = len(self.bonds)
+			if sellNum > 0:
+				ask = Ask(bonds[0].est_return(time_remaining), bonds[0].price, sellNum)
+				print(self.name, 'asks', ask.est_return, ask.price, ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			chat.update(self.name, "buying")
 			desired_return=1.1
-			#self.bids.append(Bid(desired_return, self.buy_limit))
+			bid = Bid(desired_return, self.buy_limit())
+			print(self.name, 'bid:', bid.desired_return, bid.vol)
 
 	def earnings():
 		print('calculate earnings')
@@ -108,6 +102,7 @@ def create_agents():
 			risk_mean = round(0.7*random.random() + 0.15, 2)
 			risk_std = round(0.1*random.random() + 0.03, 2)
 			agents.append(Agent(name, risk_mean, risk_std))
+			print(name, risk_mean, risk_std)
 
 
 def agent_trade(risk, time_remaining):

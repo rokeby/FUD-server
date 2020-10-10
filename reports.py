@@ -31,6 +31,7 @@ def track(row, sysName, time_remaining):
 #eventually replace w/ something that can get market object
 def get_risk(row, risk):
 	if not row[1][0].isspace():
+		print('risk is', risk)
 		cat = storm_classifier.classifier[row[3].strip()]
 		risk = cat['risk']
 	return risk
