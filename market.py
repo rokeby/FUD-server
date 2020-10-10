@@ -45,7 +45,6 @@ class Agent:
 			chat.update(self.name, chat_string)
 
 
-
 def create_agents():
 	global agents
 	print('creating agents')
