@@ -6,6 +6,11 @@ The code in this repository:
 * runs the simulation as a series of threads which control the market, the dialog, and the 
 
 
+3 main threads
+* server (handles requests)
+* reports (tracks the hurricane and the risk)
+* market (manages the agents and trading)
+
 ### restarting the service file
 ```
 systemctl --user restart simulation
