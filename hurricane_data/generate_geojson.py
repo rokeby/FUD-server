@@ -17,7 +17,6 @@
 
 # generate 'report' paragraph about each storm
 
-
 import csv
 import re
 import json
@@ -25,9 +24,29 @@ import regex as re
 from datetime import datetime
 from geojson import Point, LineString, Feature, FeatureCollection, MultiPoint
 import pyproj as proj
+from geopy import distance
 
 #static files
 from storm_classifier import classifier
+
+
+def calculateRisk(lat, lon)
+	center_point = [{'lat': lat, 'lng': lon}]
+	radius = 5 # in kilometer
+	with open('cities_pop.csv', newline='') as csvfile:
+		cities = csv.reader(csvfile, delimiter=',')
+		for row in cities:
+			test_point = 
+			center_point_tuple = tuple(center_point[0].values()) # (-7.7940023, 110.3656535)
+			test_point_tuple = tuple(test_point[0].values()) # (-7.79457, 110.36563)
+
+			dis = distance.distance(center_point_tuple, test_point_tuple).km
+			print("Distance: {}".format(dis)) # Distance: 0.0628380925748918
+
+			if dis <= radius:
+				print("{} point is inside the {} km radius from {} coordinate".format(test_point_tuple, radius, center_point_tuple))
+			else:
+				print("{} point is outside the {} km radius from {} coordinate".format(test_point_tuple, radius, center_point_tuple))
 
 
 if __name__ == "__main__":
@@ -59,8 +78,10 @@ if __name__ == "__main__":
 				coord.append(-float(re.sub('S', '', row[4])))
 			else: break
 
+			risk = calculateRisk(coord);
+
 			date = datetime.strptime(row[0], "%Y%m%d")
-			point = Feature(geometry=Point(coord), 
+			point = Feature(geometry=Point(coord[1], coord[0]), 
 				properties={
 					'class': row[3].strip(), 
 					'date': date.strftime('%m-%d-%Y'),
