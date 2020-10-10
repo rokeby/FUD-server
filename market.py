@@ -54,7 +54,7 @@ class Ask:
 		self.asker = asker
 
 class Agent:
-	funds = 10000
+	funds = 1000
 	bonds=[]
 
 	def __init__(self, name='', risk_mean=0.0, risk_std=0.05):
@@ -118,6 +118,7 @@ def create_agents():
 def agent_trade(risk, time_remaining):
 	global agents
 	for agent in agents:
+		print(agent.name, agent.funds)
 		agent.trade(risk, time_remaining)
 
 #this could belong to World?
@@ -137,12 +138,16 @@ def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()
 	for bid in market.bid_list:
-		for bond in market.bonds:
-			print('est return is', bond.est_return(time_remaining))
-			if bid.desired_return < bond.est_return(time_remaining) and bond.price < bid.vol:
-				bid.vol = bid.vol-bond.price
-				agent = next((agent for agent in agents if agent.name == bid.bidder), None)
-				print('success, sold bond to ', agent.name, bid.bidder)
-				agent.bonds.append(bond)
-				market.bonds.remove(bond)
+		if len(market.bonds) > 0:
+			price = market.bonds[0].price
+			while bid.vol > price:
+				bond = market.bonds[0]
+				print('est return is', bond.est_return(time_remaining))
+				if bid.desired_return < bond.est_return(time_remaining):
+					agent = next((agent for agent in agents if agent.name == bid.bidder), None)
+					bid.vol = bid.vol-bond.price
+					agent.funds = agent.funds-bond.price
+					print('success, sold bond to ', agent.name)
+					agent.bonds.append(bond)
+					market.bonds.remove(bond)
 #	for ask in market.ask_list:
