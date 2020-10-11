@@ -3,6 +3,7 @@ import re
 import time
 import threading
 import os
+import json
 
 #submodules
 import server
@@ -41,13 +42,15 @@ def trading():
 # of tranches of hurricane bonds
 def ticker():
 	global risk, sysName, time_remaining
-	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
-		reader = csv.reader(csvfile)
+	with open('hurricane_data/hurricanes.json') as file:
+		data = json.load(file)
 		while True:
-			for row in reader:
-				time_remaining = reports.track(row, sysName, time_remaining)
-				risk = reports.get_risk(row, risk)
-				time.sleep(2)
+			for hurricane in data:
+				server.new_hurricane(hurricane)
+				for point in hurricane['geoJSON']['features']:
+				# time_remaining = reports.track(row, sysName, time_remaining)
+				# risk = reports.get_risk(row, risk)
+					time.sleep(2)
 
 
 if __name__ == "__main__":
@@ -59,9 +62,9 @@ if __name__ == "__main__":
 
 	try:
 		#start server
-		server = threading.Thread(target=server.run)
-		server.daemon=True
-		server.start()
+		app = threading.Thread(target=server.run)
+		app.daemon=True
+		app.start()
 
 		#start hurricane timer
 		mainLoop = threading.Thread(target=ticker)

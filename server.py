@@ -8,10 +8,14 @@ dirname = os.path.dirname(__file__)
 app = Flask(__name__)
 
 cors = CORS(app)
+hurricane = {}
 
+def new_hurricane(hur):
+	global hurricane
+	hurricane=hur
 
 @app.route("/userchat", methods=["POST"])
-def postChat():
+def post_chat():
 	user = request.form['user']
 	chat_string = request.form['chat_string']
 	print('adding to chat')
@@ -31,7 +35,7 @@ def postChat():
 
 
 @app.route("/chat", methods=["GET"])
-def getChat():
+def get_chat():
 	conn = None
 	chat = []
 	try:
@@ -54,12 +58,14 @@ def getChat():
 			conn.close()
 	return 'chat'
 
+
 @app.route("/hurricane", methods=["GET"])
-def getHurricane():
-	return "got hurricane"
+def get_hurricane():
+	global hurricane
+	return json.dumps(hurricane, indent=4, sort_keys=True)
 
 @app.route("/", methods=["GET"])
-def getAll():
+def get_all():
 	return "blah"
 
 def run():
