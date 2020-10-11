@@ -3,6 +3,7 @@ import re
 import time
 import threading
 import os
+import json
 
 #submodules
 import server
@@ -16,18 +17,20 @@ dirname = os.path.dirname(__file__)
 risk = 0.0
 db_file = os.path.join(dirname, 'fud.db')
 sysName = 'fud'
+time_remaining = 20
 
 #variables that need to be global
 #risk
 
 ###THREAD B
 
-# this thread controls the market and chat. it takes the risk values
+# this thread controls the main loop of the market and chat. it takes the risk values
 # and tranche sales from the hurricane
 def trading():
 	global risk
 	while True:
-		market.agent_trade(risk)
+		market.agent_trade(risk, time_remaining)
+		market.run_exchange(risk, time_remaining)
 		time.sleep(2)
 
 
@@ -39,13 +42,15 @@ def trading():
 # of tranches of hurricane bonds
 def ticker():
 	global risk, sysName
-	while True:
-		with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
-			reader = csv.reader(csvfile)
-			for row in reader:
-				reports.track(row, sysName)
-				risk = reports.get_risk(row, risk)
-				time.sleep(2)
+	with open(os.path.join(dirname,'./hurricane_data/hurricanes.json')) as file:
+		data = json.load(file)
+		while True:
+			for hurricane in data:
+				server.new_hurricane(hurricane)
+				for point in hurricane['geoJSON']['features']:
+				# time_remaining = reports.track(row, sysName, time_remaining)
+				# risk = reports.get_risk(row, risk)
+					time.sleep(2)
 
 
 if __name__ == "__main__":
@@ -57,9 +62,9 @@ if __name__ == "__main__":
 
 	try:
 		#start server
-		server = threading.Thread(target=server.run)
-		server.daemon=True
-		server.start()
+		app = threading.Thread(target=server.run)
+		app.daemon=True
+		app.start()
 
 		#start hurricane timer
 		mainLoop = threading.Thread(target=ticker)

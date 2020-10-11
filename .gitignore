@@ -1,4 +1,5 @@
 __pycache__/
 *.db
 *.pyc
-
+.DS_Store
+hurricane_data/worldcitiespop.csv
