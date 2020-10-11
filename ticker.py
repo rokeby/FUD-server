@@ -39,9 +39,9 @@ def trading():
 # of tranches of hurricane bonds
 def ticker():
 	global risk, sysName
-	with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
-		reader = csv.reader(csvfile)
-		while True:
+	while True:
+		with open(os.path.join(dirname, 'hurdat-mini.csv')) as csvfile:
+			reader = csv.reader(csvfile)
 			for row in reader:
 				reports.track(row, sysName)
 				risk = reports.get_risk(row, risk)
