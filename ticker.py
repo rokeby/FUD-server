@@ -17,8 +17,8 @@ dirname = os.path.dirname(__file__)
 risk = 0.0
 db_file = os.path.join(dirname, 'fud.db')
 sysName = 'fud'
-time_remaining = 20
 periods_per_day = 4
+time_remaining = periods_per_day*24
 
 #variables that need to be global
 #risk
@@ -28,7 +28,7 @@ periods_per_day = 4
 # this thread controls the main loop of the market and chat. it takes the risk values
 # and tranche sales from the hurricane
 def trading():
-	global risk
+	global risk, time_remaining
 	while True:
 		market.agent_trade(risk, time_remaining)
 		market.run_exchange(risk, time_remaining)
@@ -42,20 +42,25 @@ def trading():
 # commentary. At various points, this thread triggers the release
 # of tranches of hurricane bonds
 def ticker():
-	global risk, sysName
+	global risk, sysName, time_remaining
 	with open(os.path.join(dirname,'./hurricane_data/hurricanes.json')) as file:
 		data = json.load(file)
-		time_remaining = periods_per_day*24
+		bond_period = periods_per_day*24
+		time_remaining = bond_period
 		while True:
 			for hurricane in data:
 				#print(json.dumps(hurricane, indent=4, sort_keys=True))
 				server.new_hurricane(hurricane)
 				reports.new_hurricane(hurricane, sysName)
+				market.reset_market()
+				market.issue_bonds(100, 0.1, 50, bond_period)
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = point['properties']['risk']
-					market.payout()
+					if risk == 1:
+						chat.update('snufkin: ', ':o shit, we lost all our money')
+					# market.payout()
 					time.sleep(2)
 
 

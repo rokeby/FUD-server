@@ -25,13 +25,15 @@ market = Market(100)
 
 #the owner of the bond determines their 'price'
 class Bond:
-	def __init__(self, initial_price=0.0, premium=0.0):
+	def __init__(self, initial_price, bond_yield, period):
 		self.initial_price = initial_price
 		self.price = initial_price
-		self.premium = premium
+		self.bond_yield = bond_yield
+		self.bond_period = period
 
 	def est_return(self, time_remaining):
-		est = ((self.initial_price - self.price) + time_remaining*self.premium)/self.price + 1
+		print('time remaining',  time_remaining, 'period', self.bond_period, 'fraction of time remaining', time_remaining/self.bond_period)
+		est = ((self.initial_price - self.price) + (time_remaining*self.bond_yield*self.initial_price)/self.bond_period)/self.price + 1
 		return est
 
 	def update_price(self, p):
@@ -79,7 +81,7 @@ class Agent:
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			chat.update(self.name, "buying")
-			desired_return=1.1
+			desired_return=1.05
 			self.bid = Bid(desired_return, self.buy_limit(), self.name)
 			print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
 
@@ -88,10 +90,10 @@ class Agent:
 		#for bond in self.bonds
 		#calculate interest
 
-def issue_bonds(price, premium, num_bonds):
+def issue_bonds(price, bond_yield, num_bonds, bond_period):
 	global market
 	for b in range(0, num_bonds):
-		bond = Bond(price, premium)
+		bond = Bond(price, bond_yield, bond_period)
 		market.bonds.append(bond)
 
 def reset_market():
@@ -109,8 +111,8 @@ def create_agents():
 	with open(os.path.join(dirname, 'names.txt'),'r') as f_open:
 		names = f_open.read()
 		for name in names.split('\n'):
-			risk_mean = round(0.7*random.random() + 0.15, 2)
-			risk_std = round(0.1*random.random() + 0.03, 2)
+			risk_mean = round(0.8*random.random(), 2)
+			risk_std = round(0.1*random.random() + 0.06, 2)
 			agents.append(Agent(name, risk_mean, risk_std))
 			print(name, risk_mean, risk_std)
 
@@ -118,7 +120,7 @@ def create_agents():
 def agent_trade(risk, time_remaining):
 	global agents
 	for agent in agents:
-		print(agent.name, agent.funds)
+		#print(agent.name, agent.funds, risk)
 		agent.trade(risk, time_remaining)
 
 #this could belong to World?
@@ -140,17 +142,44 @@ def payout():
 def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()
+	print("risk is", risk)
 	for bid in market.bid_list:
+
+		# if there are market bonds to sell
 		if len(market.bonds) > 0:
+			agent = next((agent for agent in agents if agent.name == bid.bidder), None)
 			price = market.bonds[0].price
-			while bid.vol > price:
-				bond = market.bonds[0]
-				print('est return is', bond.est_return(time_remaining))
-				if bid.desired_return < bond.est_return(time_remaining):
-					agent = next((agent for agent in agents if agent.name == bid.bidder), None)
-					bid.vol = bid.vol-bond.price
-					agent.funds = agent.funds-bond.price
-					print('success, sold bond to ', agent.name)
-					agent.bonds.append(bond)
-					market.bonds.remove(bond)
+			est_return = market.bonds[0].est_return(time_remaining)
+			print('est return is', est_return, 'desired return is', bid.desired_return)
+
+			if est_return > bid.desired_return:
+				num_bonds = math.floor(bid.vol/float(price))
+				print(num_bonds, bid.vol, price)
+
+				#if not enough, sell all the bonds in the market to the agent
+				if len(market.bonds) < num_bonds:
+					num_bonds = len(market.bonds)
+
+				#concatenate
+				agent.bonds = agent.bonds + market.bonds[:num_bonds]
+				agent.funds = agent.funds-price*num_bonds
+
+				#remove from the market
+				market.bonds = market.bonds[num_bonds:]
+				print('success, sold', num_bonds, 'bonds to ', agent.name, len(market.bonds), 'remaining')
+
+		#then, if there are asks
+		if len(market.ask_list) > 0:
+			print('handling asks')
+
+			# if bid.vol > price:
+			# 	bond = market.bonds[0]
+			# 	print('est return is', bond.est_return(time_remaining))
+			# 	if bid.desired_return < bond.est_return(time_remaining):
+			# 		agent = next((agent for agent in agents if agent.name == bid.bidder), None)
+			# 		bid.vol = bid.vol-bond.price
+			# 		agent.funds = agent.funds-bond.price
+			# 		print('success, sold bond to ', agent.name)
+			# 		agent.bonds.append(bond)
+			# 		market.bonds.remove(bond)
 #	for ask in market.ask_list:

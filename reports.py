@@ -9,9 +9,8 @@ name = ''
 
 
 def new_hurricane(hurricane, sysName):
-	market.reset_market()
-	market.issue_bonds(100, 5, 50)
 	chat.update(sysName, '### NEW STORM: '+ hurricane['metadata']['name'])
+	print('### NEW STORM: '+ hurricane['metadata']['name'])
 
 #tracks the hurricane
 def track(point, sysName, time_remaining):
