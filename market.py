@@ -99,10 +99,6 @@ def reset_market():
 	global market
 	market.bonds = []
 
-	#shuffle agents so it's not always the same people
-	# at the front of the queue
-	#market bonds to 0
-
 def create_agents():
 	global agents
 	print('creating agents')
@@ -137,6 +133,10 @@ def calculate_buy_sell_lists():
 
 def payout():
 	print('paying out the bond yield')
+
+def shuffle_agents():
+	global agents
+	random.shuffle(agents)
 
 def run_exchange(risk, time_remaining):
 	global agents, market
@@ -173,10 +173,10 @@ def run_exchange(risk, time_remaining):
 		if len(market.ask_list) > 0:
 
 			#make a copy so we can remove while we iterate
-			for index, ask in enumerate(market.ask_list[:]):
+			for index, ask in enumerate(market.ask_list):
 				ask_agent = next((agent for agent in agents if agent.name == ask.asker), None)
 				price = ask.price
-				if ask.est_return > bid.desired_return:
+				if ask.est_return > bid.desired_return and ask.num > 0:
 					num_bonds = math.floor(bid.vol/price)
 					if num_bonds > 0:
 						if num_bonds > ask.num:
@@ -190,9 +190,7 @@ def run_exchange(risk, time_remaining):
 						ask_agent.funds = ask_agent.funds+price*num_bonds
 
 						#update the ask
-						market.ask_list[index].num = ask.num - num_bonds
-						if ask.num == 0:
-							market.ask_list.remove(ask)
+						ask.num = ask.num - num_bonds
 
 						#update the bid
 						bid.vol = bid.vol-price*num_bonds

@@ -32,6 +32,7 @@ def trading():
 	while True:
 		market.agent_trade(risk, time_remaining)
 		market.run_exchange(risk, time_remaining)
+		market.shuffle_agents()
 		time.sleep(2)
 
 
