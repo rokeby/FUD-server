@@ -98,9 +98,9 @@ def issue_bonds(price, bond_yield, num_bonds, bond_period):
 		bond = Bond(price, bond_yield, bond_period)
 		market.bonds.append(bond)
 
-def reset_market():
-	global market
-	market.bonds = []
+def shuffle_agents():
+	global agents
+	random.shuffle(agents)
 
 def create_agents():
 	global agents
@@ -135,15 +135,26 @@ def calculate_buy_sell_lists():
 			market.ask_list.append(agent.ask)
 
 def yield_payout():
-	print('paying out the bond yield')
 	global agents
 	for agent in agents:
 		for bond in agent.bonds:
 			agent.funds = round(agent.funds + bond.yield_per_unit_time(), 2)
 
-def shuffle_agents():
+def loss_event():
 	global agents
-	random.shuffle(agents)
+	for agent in agents:
+		if len(agent.bonds) > 0:
+			chat.update(agent.name, 'o shit o shit o shit')
+			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
+		agent.bonds = []
+
+def reset_market(time_remaining):
+	global market, agents
+	market.bonds = []
+	for agent in agents:
+		for bond in agent.bonds:
+			agent.funds = round(agent.funds + bond.initial_price + bond.yield_per_unit_time()*time_remaining, 2)
+		agent.bonds = []
 
 def run_exchange(risk, time_remaining):
 	global agents, market

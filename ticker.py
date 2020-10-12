@@ -23,6 +23,7 @@ time_remaining = periods_per_day*24
 #variables that need to be global
 #risk
 
+
 ###THREAD B
 
 # this thread controls the main loop of the market and chat. it takes the risk values
@@ -50,17 +51,16 @@ def ticker():
 		time_remaining = bond_period
 		while True:
 			for hurricane in data:
-				#print(json.dumps(hurricane, indent=4, sort_keys=True))
 				server.new_hurricane(hurricane)
 				reports.new_hurricane(hurricane, sysName)
-				market.reset_market()
+				market.reset_market(time_remaining)
 				market.issue_bonds(100, 0.1, 50, bond_period)
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = point['properties']['risk']
 					if risk == 1:
-						chat.update('snufkin: ', ':o shit, we lost all our money')
+						market.loss_event()
 					market.yield_payout()
 					time.sleep(2)
 
