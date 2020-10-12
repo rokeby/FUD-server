@@ -31,6 +31,9 @@ class Bond:
 		self.bond_yield = bond_yield
 		self.bond_period = period
 
+	def yield_per_unit_time(self):
+		return (self.bond_yield*self.initial_price)/self.bond_period
+
 	def est_return(self, time_remaining):
 		est = ((self.initial_price - self.price) + (time_remaining*self.bond_yield*self.initial_price)/self.bond_period)/self.price + 1
 		return est
@@ -131,8 +134,12 @@ def calculate_buy_sell_lists():
 		elif agent.ask:
 			market.ask_list.append(agent.ask)
 
-def payout():
+def yield_payout():
 	print('paying out the bond yield')
+	global agents
+	for agent in agents:
+		for bond in agent.bonds:
+			agent.funds = round(agent.funds + bond.yield_per_unit_time(), 2)
 
 def shuffle_agents():
 	global agents
@@ -154,20 +161,26 @@ def run_exchange(risk, time_remaining):
 			if est_return > bid.desired_return:
 				num_bonds = math.floor(bid.vol/float(price))
 
-				#if not enough, sell all the bonds in the market to the agent
-				if num_bonds > len(market.bonds):
-					num_bonds = len(market.bonds)
+				if num_bonds > 0:
+					#if not enough, sell all the bonds in the market to the agent
+					if num_bonds > len(market.bonds):
+						num_bonds = len(market.bonds)
 
-				#concatenate
-				bid_agent.bonds = bid_agent.bonds + market.bonds[:num_bonds]
-				bid_agent.funds = bid_agent.funds-price*num_bonds
+					#concatenate
+					bid_agent.bonds = bid_agent.bonds + market.bonds[:num_bonds]
+					bid_agent.funds = bid_agent.funds-price*num_bonds
 
-				#update the bid volume
-				bid.vol = bid.vol-price*num_bonds
+					#update the bid volume
+					bid.vol = bid.vol-price*num_bonds
 
-				#remove from the market
-				market.bonds = market.bonds[num_bonds:]
-				print('the market sold', num_bonds, 'bonds to ', bid_agent.name, len(market.bonds), 'remaining')
+					#remove from the market
+					market.bonds = market.bonds[num_bonds:]
+					print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
+					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche')
+
+				if len(market.bonds) == 0:
+					chat.update('market', 'all the bonds in this tranche have now been sold')
+					print('all the bonds in this tranche have now been sold')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
@@ -196,5 +209,4 @@ def run_exchange(risk, time_remaining):
 						bid.vol = bid.vol-price*num_bonds
 
 						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
-						# print('now, asker has', len(ask_agent.bonds), 'bidder has ', len(bid_agent.bonds))
-
+						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))

@@ -61,7 +61,7 @@ def ticker():
 					risk = point['properties']['risk']
 					if risk == 1:
 						chat.update('snufkin: ', ':o shit, we lost all our money')
-					# market.payout()
+					market.yield_payout()
 					time.sleep(2)
 
 
