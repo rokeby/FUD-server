@@ -74,10 +74,10 @@ def ticker():
 		time_remaining = bond_period
 		while True:
 			for hurricane in data:
-				server.new_hurricane(hurricane)
 				reports.new_hurricane(hurricane, sysName)
 				market.reset_market(time_remaining)
 				market.issue_bonds(100, 0.1, 50, bond_period)
+				server.new_hurricane()
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
