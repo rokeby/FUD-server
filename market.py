@@ -134,6 +134,9 @@ def calculate_buy_sell_lists():
 		elif agent.ask:
 			market.ask_list.append(agent.ask)
 
+def payout():
+	print('paying out the bond yield')
+
 def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()

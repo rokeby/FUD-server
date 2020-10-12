@@ -9,10 +9,16 @@ app = Flask(__name__)
 
 cors = CORS(app)
 hurricane = {}
+point = {}
 
 def new_hurricane(hur):
 	global hurricane
 	hurricane=hur
+
+
+def new_point(p):
+	global point
+	point=p
 
 @app.route("/userchat", methods=["POST"])
 def post_chat():
@@ -63,6 +69,11 @@ def get_chat():
 def get_hurricane():
 	global hurricane
 	return json.dumps(hurricane, indent=4, sort_keys=True)
+
+@app.route("/point", methods=["GET"])
+def get_point():
+	global point
+	return json.dumps(point, indent=4, sort_keys=True)
 
 @app.route("/", methods=["GET"])
 def get_all():

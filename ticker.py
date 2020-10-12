@@ -18,6 +18,7 @@ risk = 0.0
 db_file = os.path.join(dirname, 'fud.db')
 sysName = 'fud'
 time_remaining = 20
+periods_per_day = 4
 
 #variables that need to be global
 #risk
@@ -44,13 +45,19 @@ def ticker():
 	global risk, sysName, time_remaining
 	with open('hurricane_data/hurricanes.json') as file:
 		data = json.load(file)
+		time_remaining = periods_per_day*24
 		while True:
 			for hurricane in data:
+				#print(json.dumps(hurricane, indent=4, sort_keys=True))
 				server.new_hurricane(hurricane)
+				reports.new_hurricane(hurricane, sysName)
 				for point in hurricane['geoJSON']['features']:
-				# time_remaining = reports.track(row, sysName, time_remaining)
-				# risk = reports.get_risk(row, risk)
+					server.new_point(point)
+					time_remaining = reports.track(point, sysName, time_remaining)
+					risk = point['properties']['risk']
+					market.payout()
 					time.sleep(2)
+
 
 
 if __name__ == "__main__":
