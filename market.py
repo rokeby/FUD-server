@@ -71,7 +71,7 @@ class Agent:
 		#initially, reset each time
 		self.bid=None
 		self.ask=None
-
+		print('agent', self.name, 'has', len(self.bonds), 'bonds')
 		if risk > self.risk_mean + 1.5*self.risk_std:
 			chat.update(self.name, "selling")
 			sellNum = len(self.bonds)
@@ -144,10 +144,10 @@ def run_exchange(risk, time_remaining):
 	calculate_buy_sell_lists()
 	print("risk is", risk)
 	for bid in market.bid_list:
+		bid_agent = next((agent for agent in agents if agent.name == bid.bidder), None)
 
 		# if there are market bonds to sell
 		if len(market.bonds) > 0:
-			agent = next((agent for agent in agents if agent.name == bid.bidder), None)
 			price = market.bonds[0].price
 			est_return = market.bonds[0].est_return(time_remaining)
 			print('est return is', est_return, 'desired return is', bid.desired_return)
@@ -157,29 +157,40 @@ def run_exchange(risk, time_remaining):
 				print(num_bonds, bid.vol, price)
 
 				#if not enough, sell all the bonds in the market to the agent
-				if len(market.bonds) < num_bonds:
+				if num_bonds > len(market.bonds):
 					num_bonds = len(market.bonds)
 
 				#concatenate
-				agent.bonds = agent.bonds + market.bonds[:num_bonds]
-				agent.funds = agent.funds-price*num_bonds
+				bid_agent.bonds = bid_agent.bonds + market.bonds[:num_bonds]
+				bid_agent.funds = bid_agent.funds-price*num_bonds
 
 				#remove from the market
 				market.bonds = market.bonds[num_bonds:]
-				print('success, sold', num_bonds, 'bonds to ', agent.name, len(market.bonds), 'remaining')
+				print('success, sold', num_bonds, 'bonds to ', bid_agent.name, len(market.bonds), 'remaining')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
 			print('handling asks')
 
-			# if bid.vol > price:
-			# 	bond = market.bonds[0]
-			# 	print('est return is', bond.est_return(time_remaining))
-			# 	if bid.desired_return < bond.est_return(time_remaining):
-			# 		agent = next((agent for agent in agents if agent.name == bid.bidder), None)
-			# 		bid.vol = bid.vol-bond.price
-			# 		agent.funds = agent.funds-bond.price
-			# 		print('success, sold bond to ', agent.name)
-			# 		agent.bonds.append(bond)
-			# 		market.bonds.remove(bond)
-#	for ask in market.ask_list:
+			#make a copy so we can remove while we iterate
+			for ask in market.ask_list[:]:
+				ask_agent = next((agent for agent in agents if agent.name == ask.asker), None)
+				if ask.est_return > bid.desired_return:
+					num_bonds = math.floor(bid.vol/ask.price)
+					if num_bonds > 0:
+						if num_bonds > ask.num:
+							num_bonds = ask.num
+
+						print('asker has', len(ask_agent.bonds), 'bidder has ', len(bid_agent.bonds))
+						bid_agent.bonds = bid_agent.bonds + ask_agent.bonds[:num_bonds]
+						bid_agent.funds = bid_agent.funds-price*num_bonds
+
+						ask_agent.bonds = ask_agent.bonds[num_bonds:]
+						ask_agent.funds = ask_agent.funds-price*num_bonds
+
+						ask.num = ask.num - num_bonds
+						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
+						print('now, asker has', len(ask_agent.bonds), 'bidder has ', len(bid_agent.bonds))
+
+						if ask.num == 0:
+							market.ask_list.remove(ask)

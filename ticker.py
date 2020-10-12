@@ -83,6 +83,7 @@ if __name__ == "__main__":
 		mainLoop.daemon=True
 		mainLoop.start()
 
+		#offset market and timer
 		time.sleep(1)
 
 		#start the market
