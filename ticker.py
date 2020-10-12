@@ -42,8 +42,8 @@ def trading():
 # commentary. At various points, this thread triggers the release
 # of tranches of hurricane bonds
 def ticker():
-	global risk, sysName, time_remaining
-	with open('hurricane_data/hurricanes.json') as file:
+	global risk, sysName
+	with open(os.path.join(dirname,'./hurricane_data/hurricanes.json')) as file:
 		data = json.load(file)
 		time_remaining = periods_per_day*24
 		while True:
