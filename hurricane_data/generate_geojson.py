@@ -86,23 +86,15 @@ def get_proximity(lat, lon, name, cat, speed):
 
 def calculate_risk(lat, lon, name, cat, speed):
 	prox = get_proximity(lat, lon, name, cat, speed)
-	# print(prox)
 	prox.sort(key=lambda x: x['risk_factor'], reverse=True)
-	#print(prox, len(prox))
-
-	#if len(prox)>0:
-		# print('hurricane near:')
-
-	#for el in prox:
-		# print(el)
-
 	return prox
 
+#need to include landfall
 
 if __name__ == "__main__":
 	hurricane = []
 	list = []
-	name='ABLE'
+	name='KATRINA'
 	num=1
 
 	print(name, '-- hurricane number', num)
@@ -132,11 +124,15 @@ if __name__ == "__main__":
 			cat = classifier[row[3].strip()]
 			prox = calculate_risk(coord[1], coord[0], name, cat, float(row[6]))
 
+			time = '0000' if row[1] == '0' else row[1]
+			time = time[:-2] + ':' + time[-2:]
+
 			date = datetime.strptime(row[0], "%Y%m%d")
 			point = Feature(geometry=Point(coord), 
 				properties={
 					'class': row[3].strip(), 
 					'date': date.strftime('%m-%d-%Y'),
+					'time': time,
 					'risk': cat['risk'],
 					'report': cat['description'],
 					'speed': row[6],
