@@ -73,7 +73,7 @@ class Agent:
 		#initially, reset each time
 		self.bid=None
 		self.ask=None
-		print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
+		#print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
 		if risk > self.risk_mean + 1.5*self.risk_std:
 			chat.update(self.name, "selling")
 			sellNum = len(self.bonds)
@@ -104,7 +104,7 @@ def shuffle_agents():
 
 def create_agents():
 	global agents
-	print('creating agents')
+	print('creating agents:')
 
 	with open(os.path.join(dirname, 'names.txt'),'r') as f_open:
 		names = f_open.read()
@@ -159,7 +159,7 @@ def reset_market(time_remaining):
 def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()
-	print("risk is", risk)
+	#print("risk is", risk)
 	for bid in market.bid_list:
 		bid_agent = next((agent for agent in agents if agent.name == bid.bidder), None)
 
@@ -186,12 +186,12 @@ def run_exchange(risk, time_remaining):
 
 					#remove from the market
 					market.bonds = market.bonds[num_bonds:]
-					print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
+					#print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
 					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche')
 
 				if len(market.bonds) == 0:
 					chat.update('market', 'all the bonds in this tranche have now been sold')
-					print('all the bonds in this tranche have now been sold')
+					#print('all the bonds in this tranche have now been sold')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
@@ -219,5 +219,5 @@ def run_exchange(risk, time_remaining):
 						#update the bid
 						bid.vol = bid.vol-price*num_bonds
 
-						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
+						#print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
 						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))

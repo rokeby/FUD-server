@@ -5,6 +5,15 @@ dirname = os.path.dirname(__file__)
 db_file = os.path.join(dirname, 'fud.db')
 
 
+def outer_loop():
+	print('outer loop chat')
+	
+
+def market_chat(agents, hurricane, market):
+	print('talking about the market')
+	
+
+
 def init_db():
 	global db_file
 	conn = None

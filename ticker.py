@@ -4,6 +4,7 @@ import time
 import threading
 import os
 import json
+import random
 
 #submodules
 import server
@@ -16,13 +17,35 @@ dirname = os.path.dirname(__file__)
 
 risk = 0.0
 db_file = os.path.join(dirname, 'fud.db')
-sysName = 'fud'
+sysName = 'weatherBot'
 periods_per_day = 4
 time_remaining = periods_per_day*24
 
 #variables that need to be global
 #risk
 
+###THREAD C
+
+# this thread controls the outer loop of the chat, which runs
+# independently of the rest of the simulation
+def outer_loop():
+	global risk
+	with open(os.path.join(dirname,'./chat_data/outer_loop.csv'), newline='') as csvfile:
+		chat_lines = csv.reader(csvfile, delimiter=',')
+		while True:
+			for line in chat_lines:
+				#too risky to chat
+				while risk > 0.1:
+					time.sleep(5)
+
+				if line[3] == 'End':
+					chat.update(line[1], line[2])
+					print('######', line[1], line[2])
+					time.sleep(round(random.random()*30))
+				else:
+					chat.update(line[1], line[2])
+					print('######', line[1], line[2])
+					time.sleep(round(random.random()*4)+2)
 
 ###THREAD B
 
@@ -91,6 +114,14 @@ if __name__ == "__main__":
 		trading = threading.Thread(target=trading, args=( ))
 		trading.daemon=True
 		trading.start()
+
+		time.sleep(1)
+
+		# start outer loop
+		outerLoop = threading.Thread(target=outer_loop)
+		outerLoop.daemon=True
+		outerLoop.start()
+
 
 		while True: time.sleep(100)
 

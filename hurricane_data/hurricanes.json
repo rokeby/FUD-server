@@ -756,7 +756,7 @@
             "highest_risk": null,
             "proximity": [],
             "report": "Tropical cyclone of hurricane intensity",
-            "risk": 0.01,
+            "risk": 0.3,
             "speed": "145",
             "time": "12:00"
           },
