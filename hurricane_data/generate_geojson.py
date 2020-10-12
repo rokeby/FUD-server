@@ -49,7 +49,9 @@ def normalise(list):
 			del point['properties']['proximity'][2:]
 
 			for city in point['properties']['proximity']:
-				city['risk_factor'] = city['risk_factor']/norm_factor
+				city['risk_factor'] = 10*city['risk_factor']/norm_factor
+				if city['risk_factor'] > 1:
+					city['risk_factor'] = 1
 			if len(point['properties']['proximity']) > 0:
 				point['properties']['risk'] = point['properties']['proximity'][0]['risk_factor']
 				point['properties']['highest_risk'] = point['properties']['proximity'][0]['name']
