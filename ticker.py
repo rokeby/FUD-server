@@ -30,9 +30,9 @@ time_remaining = periods_per_day*24
 # independently of the rest of the simulation
 def outer_loop():
 	global risk
-	with open(os.path.join(dirname,'./chat_data/outer_loop.csv'), newline='') as csvfile:
-		chat_lines = csv.reader(csvfile, delimiter=',')
-		while True:
+	while True:
+		with open(os.path.join(dirname,'./chat_data/outer_loop.csv'), newline='') as csvfile:
+			chat_lines = csv.reader(csvfile, delimiter=',')
 			for line in chat_lines:
 				#too risky to chat
 				while risk > 0.1:
@@ -46,6 +46,7 @@ def outer_loop():
 					chat.update(line[1], line[2])
 					print('######', line[1], line[2])
 					time.sleep(round(random.random()*4)+2)
+		print('reached end of file')
 
 ###THREAD B
 
@@ -57,6 +58,7 @@ def trading():
 		market.agent_trade(risk, time_remaining)
 		market.run_exchange(risk, time_remaining)
 		market.shuffle_agents()
+		market.get_state()
 		time.sleep(2)
 
 
@@ -68,21 +70,21 @@ def trading():
 # of tranches of hurricane bonds
 def ticker():
 	global risk, sysName, time_remaining
-	with open(os.path.join(dirname,'./hurricane_data/hurricanes.json')) as file:
-		data = json.load(file)
-		bond_period = periods_per_day*24
-		time_remaining = bond_period
-		while True:
+	while True:
+		with open(os.path.join(dirname,'./hurricane_data/hurricanes-big.json')) as file:
+			data = json.load(file)
+			bond_period = periods_per_day*24
+			time_remaining = bond_period
 			for hurricane in data:
 				reports.new_hurricane(hurricane, sysName)
 				market.reset_market(time_remaining)
-				market.issue_bonds(100, 0.1, 50, bond_period)
+				market.issue_bonds(100, 0.5, 50, bond_period)
 				server.new_hurricane()
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = point['properties']['risk']
-					if risk == 1:
+					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
 					time.sleep(2)
