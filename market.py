@@ -3,6 +3,10 @@ import os
 import chat
 import math
 import random
+import server
+import helpers
+import json
+# from collections import namedtuple
 
 dirname = os.path.dirname(__file__)
 agents = []
@@ -22,6 +26,9 @@ class Market:
 
 	def spread():
 		print('calculating spread')
+
+	def as_dict():
+		return {'bonds': self.bonds, 'ask_list': self.ask_list, 'bid_list': self.bid_list}
 
 market = Market(100)
 
@@ -43,6 +50,10 @@ class Bond:
 	def update_price(self, p):
 		self.price = p
 
+	def as_dict():
+		return {'a': self.a, 'b': self.b, 'c': self.c}
+
+
 #volume is in dollars, est return is the number of
 #dollars you get back for what you put in
 class Bid:
@@ -51,6 +62,9 @@ class Bid:
 		self.vol = vol
 		self.bidder = bidder
 
+	def as_dict():
+		return {'a': self.a, 'b': self.b, 'c': self.c}
+
 
 class Ask:
 	def __init__(self, est_return, price, num, asker):
@@ -58,6 +72,8 @@ class Ask:
 		self.price = price
 		self.num = num
 		self.asker = asker
+	def as_dict():
+		return {'a': self.a, 'b': self.b, 'c': self.c}
 
 class Agent:
 	bonds=[]
@@ -96,6 +112,9 @@ class Agent:
 		print('calculate earnings')
 		#for bond in self.bonds
 		#calculate interest
+
+	def as_dict():
+		return {'a': self.a, 'b': self.b, 'c': self.c}
 
 def issue_bonds(price, bond_yield, num_bonds, bond_period):
 	global market
@@ -179,6 +198,7 @@ def reset_market(time_remaining):
 def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()
+	server.update_market(helpers.get_json(market), helpers.get_json(agents))
 	#print("risk is", risk)
 	for bid in market.bid_list:
 		bid_agent = next((agent for agent in agents if agent.name == bid.bidder), None)
@@ -241,3 +261,6 @@ def run_exchange(risk, time_remaining):
 
 						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
 						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
+
+	# server.update_market(market, agents)
+

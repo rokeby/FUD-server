@@ -8,7 +8,7 @@ import random
 
 #submodules
 import server
-import stats
+import helpers
 import chat
 import market
 import reports
@@ -85,7 +85,7 @@ def ticker():
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
-					risk = stats.add_noise(point['properties']['risk'])
+					risk = helpers.add_noise(point['properties']['risk'])
 					print('risk is', round(risk, 3))
 					if risk >= 1:
 						market.loss_event()

@@ -1,5 +1,6 @@
 # from scipy.stats import skewnorm
 import numpy
+import json
 
 def add_noise(risk):
 	threshold_risk = risk
@@ -14,3 +15,9 @@ def add_noise(risk):
 	if risk < 0:
 		risk = 0
 	return risk
+
+
+def get_json(obj):
+	return json.loads(
+		json.dumps(obj, default=lambda o: getattr(o, '__dict__', str(o)))
+	)
