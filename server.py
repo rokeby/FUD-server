@@ -8,7 +8,7 @@ dirname = os.path.dirname(__file__)
 app = Flask(__name__)
 
 cors = CORS(app)
-hurricane = {}
+hurricane = []
 market_object = {
 	'market': {},
 	'agents': []
