@@ -50,9 +50,6 @@ class Bond:
 	def update_price(self, p):
 		self.price = p
 
-	def as_dict():
-		return {'a': self.a, 'b': self.b, 'c': self.c}
-
 
 #volume is in dollars, est return is the number of
 #dollars you get back for what you put in
@@ -62,9 +59,6 @@ class Bid:
 		self.vol = vol
 		self.bidder = bidder
 
-	def as_dict():
-		return {'a': self.a, 'b': self.b, 'c': self.c}
-
 
 class Ask:
 	def __init__(self, est_return, price, num, asker):
@@ -72,8 +66,6 @@ class Ask:
 		self.price = price
 		self.num = num
 		self.asker = asker
-	def as_dict():
-		return {'a': self.a, 'b': self.b, 'c': self.c}
 
 class Agent:
 	bonds=[]
@@ -92,18 +84,18 @@ class Agent:
 		self.bid=None
 		self.ask=None
 		if len(self.bonds) > 0:
-			print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
+			# print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
 			if risk > self.risk_mean + 1.5*self.risk_std:
-				chat.update(self.name, "selling")
-				print(self.name, "selling")
+				if random.random() > 0.85: 
+					chat.selling(self.name)
 				sellNum = len(self.bonds)
 				if sellNum > 0:
 					self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
 					# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
-			chat.update(self.name, "buying")
-			print(self.name, "buying")
+			if random.random() > 0.85: 
+				chat.buying(self.name)
 			desired_return=1.05
 			self.bid = Bid(desired_return, self.buy_limit(), self.name)
 			# print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
@@ -126,6 +118,10 @@ def issue_bonds(price, bond_yield, num_bonds, bond_period):
 def shuffle_agents():
 	global agents
 	random.shuffle(agents)
+
+def rand_agent():
+	global agents
+	return random.choice(agents)
 
 def get_state():
 	global agents, market

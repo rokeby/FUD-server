@@ -35,19 +35,9 @@ def outer_loop():
 		with open(os.path.join(dirname,'./chat_data/outer_loop.csv'), newline='') as csvfile:
 			chat_lines = csv.reader(csvfile, delimiter=',')
 			for line in chat_lines:
-				#too risky to chat
-				while risk > 0.15:
+				while risk > 0.2:
 					time.sleep(5)
-
-				if line[3] == 'End':
-					chat.update(line[1], line[2])
-					print('######', line[1], line[2])
-					time.sleep(round(random.random()*30))
-				else:
-					chat.update(line[1], line[2])
-					print('######', line[1], line[2])
-					time.sleep(round(random.random()*4)+2)
-		print('reached end of file')
+				chat.outer_loop(line, risk)
 
 ###THREAD B
 
@@ -59,7 +49,6 @@ def trading():
 		market.agent_trade(risk, time_remaining)
 		market.run_exchange(risk, time_remaining)
 		market.shuffle_agents()
-		market.get_state()
 		time.sleep(2)
 
 
@@ -76,30 +65,30 @@ def ticker():
 			data = json.load(file)
 			bond_period = periods_per_day*24
 			for hurricane in data:
-				print('##storm ended')
 				time_remaining = bond_period
 				reports.new_hurricane(hurricane, sysName)
 				market.reset_market(time_remaining)
+				market.get_state()
 				market.issue_bonds(100, 0.5, 50, bond_period)
 				server.new_hurricane()
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = helpers.add_noise(point['properties']['risk'])
-					print('risk is', round(risk, 3))
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
 					time.sleep(2)
-
+				print('##storm ended')
 
 
 if __name__ == "__main__":
 	print("#### welcome to fud #####")
 
 	#remove this before running on final version
-	chat.init_db()
 	market.create_agents()
+	chat.init_db()
+	chat.load_chats()
 
 	try:
 		#start server

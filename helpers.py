@@ -10,7 +10,7 @@ def add_noise(risk):
 		threshold_risk = 0.99
 
 	#noise amount varies depending on how close you are to 0
-	risk = risk+numpy.random.normal(0.2, (1-threshold_risk)/15)
+	risk = risk+numpy.random.normal(0.2, (1-threshold_risk)/25)
 
 	if risk < 0:
 		risk = 0
