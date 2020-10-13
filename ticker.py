@@ -8,6 +8,7 @@ import random
 
 #submodules
 import server
+import stats
 import chat
 import market
 import reports
@@ -35,7 +36,7 @@ def outer_loop():
 			chat_lines = csv.reader(csvfile, delimiter=',')
 			for line in chat_lines:
 				#too risky to chat
-				while risk > 0.1:
+				while risk > 0.15:
 					time.sleep(5)
 
 				if line[3] == 'End':
@@ -71,7 +72,7 @@ def trading():
 def ticker():
 	global risk, sysName, time_remaining
 	while True:
-		with open(os.path.join(dirname,'./hurricane_data/hurricanes-big.json')) as file:
+		with open(os.path.join(dirname,'./hurricane_data/hurricanes-norm.json')) as file:
 			data = json.load(file)
 			bond_period = periods_per_day*24
 			time_remaining = bond_period
@@ -83,7 +84,8 @@ def ticker():
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
-					risk = point['properties']['risk']
+					risk = stats.add_noise(point['properties']['risk'])
+					print('risk is', round(risk, 3))
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
