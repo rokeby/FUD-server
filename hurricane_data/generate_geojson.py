@@ -49,9 +49,7 @@ def normalise(list):
 			del point['properties']['proximity'][2:]
 
 			for city in point['properties']['proximity']:
-				city['risk_factor'] = 10*city['risk_factor']/norm_factor
-				if city['risk_factor'] > 1:
-					city['risk_factor'] = 1
+				city['risk_factor'] = 4*city['risk_factor']/norm_factor
 			if len(point['properties']['proximity']) > 0:
 				point['properties']['risk'] = point['properties']['proximity'][0]['risk_factor']
 				point['properties']['highest_risk'] = point['properties']['proximity'][0]['name']
@@ -96,7 +94,7 @@ def calculate_risk(lat, lon, name, cat, speed):
 if __name__ == "__main__":
 	hurricane = []
 	list = []
-	name='KATRINA'
+	name='ABLE'
 	num=1
 
 	print(name, '-- hurricane number', num)
@@ -153,12 +151,12 @@ if __name__ == "__main__":
 			num = num+1
 			print(name, '-- hurricane number', num)
 			first_step=True
-			if num > 30:
-				break
+			# if num > 1:
+			# 	break
 
 
 	normalise(list)
 	json = json.dumps(list, indent=2, sort_keys=True)
-	f = open("hurricanes.json","w")
+	f = open("hurricanes-big.json","w")
 	f.write(json)
 	f.close()
