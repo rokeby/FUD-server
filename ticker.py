@@ -75,8 +75,9 @@ def ticker():
 		with open(os.path.join(dirname,'./hurricane_data/hurricanes-norm.json')) as file:
 			data = json.load(file)
 			bond_period = periods_per_day*24
-			time_remaining = bond_period
 			for hurricane in data:
+				print('##storm ended')
+				time_remaining = bond_period
 				reports.new_hurricane(hurricane, sysName)
 				market.reset_market(time_remaining)
 				market.issue_bonds(100, 0.5, 50, bond_period)

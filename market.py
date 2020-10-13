@@ -77,15 +77,17 @@ class Agent:
 		self.ask=None
 		if len(self.bonds) > 0:
 			print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
-		if risk > self.risk_mean + 1.5*self.risk_std:
-			chat.update(self.name, "selling")
-			sellNum = len(self.bonds)
-			if sellNum > 0:
-				self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
-				# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
+			if risk > self.risk_mean + 1.5*self.risk_std:
+				chat.update(self.name, "selling")
+				print(self.name, "selling")
+				sellNum = len(self.bonds)
+				if sellNum > 0:
+					self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
+					# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			chat.update(self.name, "buying")
+			print(self.name, "buying")
 			desired_return=1.05
 			self.bid = Bid(desired_return, self.buy_limit(), self.name)
 			# print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
@@ -170,6 +172,8 @@ def reset_market(time_remaining):
 				payout = round(bond.initial_price + bond.yield_per_unit_time()*time_remaining, 2)
 				agent.funds = agent.funds + payout
 			print('agent', agent.name, 'received', '$'+str(payout*len(agent.bonds)), 'payout')
+		agent.bid = None
+		agent.ask = None
 		agent.bonds = []
 
 def run_exchange(risk, time_remaining):
