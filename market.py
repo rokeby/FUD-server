@@ -43,7 +43,7 @@ class Bond:
 		return est
 
 	def update_price(self, p):
-		self.price = p
+		self.price = round(p, 2)
 
 
 #volume is in dollars, est return is the number of
@@ -81,6 +81,9 @@ class Agent:
 		if len(self.bonds) > 0:
 			# print('agent', self.name, 'has', len(self.bonds), 'bonds and $', self.funds)
 			if risk > self.risk_mean + 1.5*self.risk_std:
+				desperation = self.desperation(risk)
+				for bond in self.bonds:
+					bond.update_price(bond.initial_price - bond.initial_price*desperation)
 				if random.random() > 0.85: 
 					chat.selling(self.name)
 				sellNum = len(self.bonds)
@@ -95,10 +98,12 @@ class Agent:
 			self.bid = Bid(desired_return, self.buy_limit(), self.name)
 			# print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
 
-	def desperation(risk):
+	def desperation(self, risk):
 		#desperation is the fraction of money you are willing to lose
 		# goes up to 70%
-		print('getting desperation')
+		desp = (0.7/self.risk_std)*(risk - (self.risk_mean + 1.5*self.risk_std))**2
+		print('getting desperation', self.name, risk, self.risk_mean, self.risk_std, desp)
+		return desp
 
 
 def issue_bonds(price, bond_yield, num_bonds, bond_period):
@@ -162,7 +167,7 @@ def loss_event():
 	for agent in agents:
 		if len(agent.bonds) > 0:
 			chat.update(agent.name, 'o shit o shit o shit')
-			# print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
+			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
 		agent.bonds = []
 
 def reset_market(time_remaining):
@@ -188,7 +193,7 @@ def run_exchange(risk, time_remaining):
 
 		# if there are market bonds to sell
 		if len(market.bonds) > 0:
-			price = market.bonds[0].price
+			price = market.bonds[0].initial_price
 			est_return = market.bonds[0].est_return(time_remaining)
 			# print('est return is', est_return, 'desired return is', bid.desired_return)
 
@@ -242,7 +247,8 @@ def run_exchange(risk, time_remaining):
 						#update the bid
 						bid.vol = bid.vol-price*num_bonds
 
-						# print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
+						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
+						print(ask_agent.name, 'made a loss of', bid_agent.bonds[len(bid_agent.bonds)-1].initial_price*num_bonds - price*num_bonds)
 						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
 
 	# server.update_market(market, agents)
