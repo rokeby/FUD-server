@@ -6,6 +6,7 @@ import random
 import server
 import helpers
 import json
+import scipy.stats
 # from collections import namedtuple
 
 dirname = os.path.dirname(__file__)
@@ -23,12 +24,6 @@ class Market:
 
 	def __init__(self, start_price):
 		self.price = start_price
-
-	def spread():
-		print('calculating spread')
-
-	def as_dict():
-		return {'bonds': self.bonds, 'ask_list': self.ask_list, 'bid_list': self.bid_list}
 
 market = Market(100)
 
@@ -79,7 +74,7 @@ class Agent:
 	def buy_limit(self):
 		return self.funds/10
 
-	def trade(self, risk=0.0, time_remaining=12):
+	def trade(self, risk, time_remaining):
 		#initially, reset each time
 		self.bid=None
 		self.ask=None
@@ -100,20 +95,17 @@ class Agent:
 			self.bid = Bid(desired_return, self.buy_limit(), self.name)
 			# print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
 
-	def earnings():
-		print('calculate earnings')
-		#for bond in self.bonds
-		#calculate interest
+	def desperation(risk):
+		#desperation is the fraction of money you are willing to lose
+		# goes up to 70%
+		print('getting desperation')
 
-	def as_dict():
-		return {'a': self.a, 'b': self.b, 'c': self.c}
 
 def issue_bonds(price, bond_yield, num_bonds, bond_period):
 	global market
 	for b in range(0, num_bonds):
 		bond = Bond(price, bond_yield, bond_period)
 		market.bonds.append(bond)
-	print('issued new bonds, market now has', len(market.bonds))
 
 def shuffle_agents():
 	global agents
@@ -129,11 +121,8 @@ def get_state():
 	for agent in agents:
 		market.current_funds = market.current_funds + agent.funds
 
-	print('current funds are', market.current_funds, "fraction", market.current_funds/market.initial_funds)
-
 def create_agents():
 	global agents, market
-	print('creating agents:')
 	with open(os.path.join(dirname, 'names.txt'),'r') as f_open:
 		names = f_open.read()
 		for name in names.split('\n'):
@@ -142,8 +131,6 @@ def create_agents():
 			funds = 5000 + round(random.random()*10000)
 			market.initial_funds = market.initial_funds + funds
 			agents.append(Agent(name, risk_mean, risk_std, funds))
-			print(name, risk_mean, risk_std)
-		print('initial funds are', market.initial_funds)
 
 def agent_trade(risk, time_remaining):
 	global agents
@@ -175,7 +162,7 @@ def loss_event():
 	for agent in agents:
 		if len(agent.bonds) > 0:
 			chat.update(agent.name, 'o shit o shit o shit')
-			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
+			# print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
 		agent.bonds = []
 
 def reset_market(time_remaining):
@@ -186,7 +173,7 @@ def reset_market(time_remaining):
 			for bond in agent.bonds:
 				payout = round(bond.initial_price + bond.yield_per_unit_time()*time_remaining, 2)
 				agent.funds = agent.funds + payout
-			print('agent', agent.name, 'received', '$'+str(payout*len(agent.bonds)), 'payout')
+			# print('agent', agent.name, 'received', '$'+str(payout*len(agent.bonds)), 'payout')
 		agent.bid = None
 		agent.ask = None
 		agent.bonds = []
@@ -222,12 +209,12 @@ def run_exchange(risk, time_remaining):
 
 					#remove from the market
 					market.bonds = market.bonds[num_bonds:]
-					print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
+					# print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
 					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche')
 
 				if len(market.bonds) == 0:
 					chat.update('market', 'all the bonds in this tranche have now been sold')
-					print('all the bonds in this tranche have now been sold')
+					# print('all the bonds in this tranche have now been sold')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
@@ -255,7 +242,7 @@ def run_exchange(risk, time_remaining):
 						#update the bid
 						bid.vol = bid.vol-price*num_bonds
 
-						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
+						# print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name)
 						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
 
 	# server.update_market(market, agents)

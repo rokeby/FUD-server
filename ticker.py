@@ -79,7 +79,7 @@ def ticker():
 						market.loss_event()
 					market.yield_payout()
 					time.sleep(20)
-				print('##storm ended')
+				# print('##storm ended')
 
 
 if __name__ == "__main__":

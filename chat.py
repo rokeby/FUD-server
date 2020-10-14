@@ -47,22 +47,22 @@ def buying(agent):
 	global buy_chat
 	chat = random.choice(buy_chat)
 	update(agent, chat.phrase)
-	print(agent, chat.phrase)
+	# print(agent, chat.phrase)
 
 def selling(agent):
 	global sell_chat
 	chat = random.choice(sell_chat)
 	update(agent, chat.phrase)
-	print(agent, chat.phrase)
+	# print(agent, chat.phrase)
 
 def outer_loop(line, risk):
 	if line[3] == 'End' or line[3] == 'One':
 		update(line[1], line[2])
-		print('######', line[1], line[2])
+		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*60))
 	else:
 		update(line[1], line[2])
-		print('######', line[1], line[2])
+		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*10)+2)
 
 
