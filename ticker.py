@@ -36,7 +36,7 @@ def outer_loop():
 			chat_lines = csv.reader(csvfile, delimiter=',')
 			for line in chat_lines:
 				while risk > 0.2:
-					time.sleep(5)
+					time.sleep(10)
 				chat.outer_loop(line, risk)
 
 ###THREAD B
@@ -78,7 +78,7 @@ def ticker():
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(2)
+					time.sleep(20)
 				print('##storm ended')
 
 
