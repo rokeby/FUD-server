@@ -12,7 +12,7 @@ big_risks = []
 def find_distribution(threshold):
 	max_risks = []
 	global big_risks
-	with open(os.path.join(dirname,'./hurricanes-norm.json')) as file:
+	with open(os.path.join(dirname,'./hurricanes-big.json')) as file:
 		data = json.load(file)
 		for hurr in data:
 			risks = []
@@ -21,7 +21,7 @@ def find_distribution(threshold):
 					risks.append(0.0)
 					point['properties']['risk'] = 0
 				else:
-					risks.append(float(point['properties']['risk']))#*1.9887285164974275)
+					risks.append(float(point['properties']['risk'])*1.9887285164974275)
 					# point['properties']['risk'] = point['properties']['risk']*1.9887285164974275
 			# sort_features = sorted(hurr['geoJSON']['features'], key=lambda x: float(x['properties']['risk']), reverse=True)
 			risks.sort(reverse=True)
@@ -29,7 +29,7 @@ def find_distribution(threshold):
 			max_risks.append(risks[0])
 			big_risks = big_risks + risks
 		norm_json = json.dumps(data, indent=2, sort_keys=True)
-		f = open("hurricanes-norm2.json","w")
+		f = open("hurricanes-norm.json","w")
 		f.write(norm_json)
 		f.close()
 	return max_risks

@@ -2,9 +2,6 @@ from datetime import datetime
 import chat
 import market
 
-#static files
-import storm_classifier
-
 name = ''
 
 

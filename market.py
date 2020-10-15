@@ -7,6 +7,7 @@ import server
 import helpers
 import json
 import scipy.stats
+import numpy as np
 # from collections import namedtuple
 
 dirname = os.path.dirname(__file__)
@@ -120,7 +121,7 @@ class Agent:
 	def eagerness(self, risk):
 		#eagerness increases within 1s.d. of mean
 		dist = scipy.stats.norm(self.risk_mean, self.risk_std/3)
-		eagerness = 0.8 + dist.pdf(risk)/(dist.pdf(self.risk_mean)*2)
+		eagerness = 0.9 + dist.pdf(risk)/(dist.pdf(self.risk_mean)*2)
 
 		#scale for sqrt earnings -> more $ = more 
 		eagerness = eagerness*math.sqrt(self.earnings() + 1)
@@ -132,9 +133,13 @@ def issue_bonds(price, bond_yield, num_bonds, bond_period):
 		bond = Bond(price, bond_yield, bond_period)
 		market.bonds.append(bond)
 
-def shuffle_agents():
-	global agents
+def shuffle():
+	global agents, market
 	random.shuffle(agents)
+
+	#add some noise to the market price
+	noise = np.random.normal(0,1)
+	market.price = market.price + noise
 
 def rand_agent():
 	global agents
@@ -203,6 +208,7 @@ def yield_payout():
 		for bond in agent.bonds:
 			agent.funds = round(agent.funds + bond.yield_per_unit_time(), 2)
 
+
 def loss_event():
 	global agents
 	for agent in agents:
@@ -227,7 +233,7 @@ def reset_market(time_remaining):
 def run_exchange(risk, time_remaining):
 	global agents, market
 	calculate_buy_sell_lists()
-	server.update_market(helpers.get_json(market), helpers.get_json(agents))
+	server.update_market(helpers.get_json(market))
 	#print("risk is", risk)
 	for bid in market.bid_list:
 		bid_agent = next((agent for agent in agents if agent.name == bid.bidder), None)
