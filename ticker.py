@@ -12,6 +12,7 @@ import helpers
 import chat
 import market
 import reports
+import oracle
 
 
 dirname = os.path.dirname(__file__)
@@ -24,6 +25,16 @@ time_remaining = periods_per_day*24
 
 #variables that need to be global
 #risk
+
+###THREAD D
+
+# this thread controls the outer loop of the chat, which runs
+# independently of the rest of the simulation
+def consult_oracle():
+	while True:
+		chat.update('oracle', oracle.consult(), 'oracle')
+		time.sleep(30*random.random())
+
 
 ###THREAD C
 
@@ -116,6 +127,11 @@ if __name__ == "__main__":
 		outerLoop.daemon=True
 		outerLoop.start()
 
+
+		# start oracle
+		commentary = threading.Thread(target=consult_oracle)
+		commentary.daemon=True
+		commentary.start()
 
 		while True: time.sleep(100)
 
