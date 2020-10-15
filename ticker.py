@@ -78,7 +78,7 @@ def ticker():
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(2)
+					time.sleep(30)
 				# print('##storm ended')
 
 
