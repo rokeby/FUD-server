@@ -3,6 +3,7 @@ from flask_cors import CORS
 import sqlite3
 import json
 import os
+import re
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__)
@@ -41,6 +42,29 @@ def post_chat():
 		if conn:
 			conn.close()
 	return 'chat'
+
+
+@app.route("/email", methods=["POST"])
+def email():
+	email = request.form['email']
+	email_pattern = re.compile(r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$")
+
+	if(re.search(email_pattern,email)):
+		conn = None
+		try:
+			conn = sqlite3.connect(os.path.join(dirname, 'mail.db'))
+			c = conn.cursor()
+			with conn:
+				c.execute("INSERT INTO mail (email) VALUES (?)", (email,))
+		except sqlite3.Error as e:
+			print(e)
+		finally:
+			if conn:
+				conn.close()
+		return 'valid email'
+
+	else:
+		return 'invalid email'
 
 
 @app.route("/chat", methods=["GET"])
