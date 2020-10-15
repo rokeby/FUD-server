@@ -47,8 +47,7 @@ def post_chat():
 @app.route("/email", methods=["POST"])
 def email():
 	email = request.form['email']
-	email_pattern = re.compile(r"^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$")
-
+	email_pattern = re.compile(r"[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+")
 	if(re.search(email_pattern,email)):
 		conn = None
 		try:
