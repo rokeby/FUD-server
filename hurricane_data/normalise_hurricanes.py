@@ -28,24 +28,17 @@ def find_distribution(threshold):
 			print(risks)
 			max_risks.append(risks[0])
 			big_risks = big_risks + risks
-		# norm_json = json.dumps(data, indent=2, sort_keys=True)
-		# f = open("hurricanes-norm.json","w")
-		# f.write(norm_json)
-		# f.close()
+		norm_json = json.dumps(data, indent=2, sort_keys=True)
+		f = open("hurricanes-norm2.json","w")
+		f.write(norm_json)
+		f.close()
 	return max_risks
 
 if __name__ == "__main__":
 	print("#### welcome to fud #####")
 	threshold = 1
 	risks = find_distribution(threshold)
-	# print(risks)
-	# df = DataFrame (risks,columns=['Max_Risk'])
-	# print(df.dtypes)
-	# df.astype('float').groupby('Max_Risk').count().plot.bar()
-	# hist = np.histogram(df, bins=40)
-	# print(hist)
-	# _ = plt.hist(hist)
-	# plt.show()
+
 	print('of all points:')
 	print('mean is', statistics.mean(big_risks))
 	print('mode is', statistics.mode(big_risks))
@@ -57,7 +50,3 @@ if __name__ == "__main__":
 	print('mode is', statistics.mode(risks))
 	print('median is', statistics.median(risks))
 	print('top 15th percentile mean is', np.percentile(risks, 75))
-
-	# print('thus, need to shift risks up by', 1.5/np.percentile(risks, 85))
-	# plt.plot(hist[0],hist[1])
-	# plt.plot(df, df.hist(bins = 30))

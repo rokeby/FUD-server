@@ -105,6 +105,10 @@ if __name__ == "__main__":
 			time = '0000' if row[1] == '0' else row[1]
 			time = time[:-2] + ':' + time[-2:]
 
+			landfall = False
+			if row[2].strip() == 'L':
+				landfall = True
+
 			date = datetime.strptime(row[0], "%Y%m%d")
 			point = Feature(geometry=Point(coord), 
 				properties={
@@ -114,6 +118,7 @@ if __name__ == "__main__":
 					'risk': cat['risk'],
 					'report': cat['description'],
 					'speed': row[6],
+					'landfall': landfall,
 					'proximity': prox
 				})
 			hurricane.append(point)
@@ -135,6 +140,6 @@ if __name__ == "__main__":
 
 	normalise(list)
 	json = json.dumps(list, indent=2, sort_keys=True)
-	f = open("hurricanes-big.json","w")
+	f = open("hurricanes-big2.json","w")
 	f.write(json)
 	f.close()

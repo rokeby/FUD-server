@@ -22,8 +22,12 @@ class Market:
 	initial_funds=0
 	current_funds=0
 
-	def __init__(self, start_price):
-		self.price = start_price
+	def __init__(self, initial_price):
+		self.price = initial_price
+		self.initial_price = initial_price
+
+	def update_price(self, p):
+		self.price = round(p, 2)
 
 market = Market(100)
 
@@ -49,8 +53,9 @@ class Bond:
 #volume is in dollars, est return is the number of
 #dollars you get back for what you put in
 class Bid:
-	def __init__(self, desired_return, vol, bidder):
+	def __init__(self, desired_return, price, vol, bidder):
 		self.desired_return = desired_return
+		self.price = price
 		self.vol = vol
 		self.bidder = bidder
 
@@ -69,6 +74,7 @@ class Agent:
 		self.name = name
 		self.risk_mean = risk_mean
 		self.risk_std = risk_std
+		self.initial_funds = funds
 		self.funds = funds
 
 	def buy_limit(self):
@@ -92,19 +98,33 @@ class Agent:
 					# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
-			if random.random() > 0.85: 
+			eagerness = self.eagerness(risk)
+			if random.random() > 0.85:
 				chat.buying(self.name)
 			desired_return=1.05
-			self.bid = Bid(desired_return, self.buy_limit(), self.name)
-			# print(self.name, 'bid:', self.bid.desired_return, self.bid.vol)
+			self.bid = Bid(desired_return, eagerness*market.initial_price, self.buy_limit(), self.name)
 
 	def desperation(self, risk):
-		#desperation is the fraction of money you are willing to lose
+		# desperation is the fraction of money you are willing to lose
 		# goes up to 70%
 		desp = (0.7/self.risk_std)*(risk - (self.risk_mean + 1.5*self.risk_std))**2
 		print('getting desperation', self.name, risk, self.risk_mean, self.risk_std, desp)
 		return desp
 
+	def earnings(self):
+		# eagerness is how much you're wanting to buy a bond for, relative to ask price
+		earnings = (self.funds - self.initial_funds)/self.funds
+		if earnings != 0.0: print(self.name, 'current earnings are', round(earnings,2), '%')
+		return earnings
+
+	def eagerness(self, risk):
+		#eagerness increases within 1s.d. of mean
+		dist = scipy.stats.norm(self.risk_mean, self.risk_std/3)
+		eagerness = 0.8 + dist.pdf(risk)/(dist.pdf(self.risk_mean)*2)
+
+		#scale for sqrt earnings -> more $ = more 
+		eagerness = eagerness*math.sqrt(self.earnings() + 1)
+		return eagerness
 
 def issue_bonds(price, bond_yield, num_bonds, bond_period):
 	global market
@@ -140,7 +160,6 @@ def create_agents():
 def agent_trade(risk, time_remaining):
 	global agents
 	for agent in agents:
-		# print(agent.name, agent.funds, risk)
 		agent.trade(risk, time_remaining)
 
 #this could belong to World?
@@ -155,6 +174,28 @@ def calculate_buy_sell_lists():
 
 		elif agent.ask:
 			market.ask_list.append(agent.ask)
+
+	if len(market.ask_list) > 0:
+		sum_asks = 0
+		#calculate market price
+		for ask in market.ask_list:
+			sum_asks = sum_asks + ask.price
+
+		market.update_price(sum_asks/len(market.ask_list))
+
+
+	if len(market.bid_list) > 0:
+		sum_bids = 0
+		for bid in market.bid_list:
+			sum_bids = sum_bids + bid.price
+
+		market.update_price((market.price + sum_bids/len(market.bid_list))/2)
+
+
+		# market.update_price(sum_asks/len(market.ask_list) + sum_bids/len(market.ask_list))
+	print('market price for bonds is', market.price)
+
+
 
 def yield_payout():
 	global agents
@@ -214,12 +255,10 @@ def run_exchange(risk, time_remaining):
 
 					#remove from the market
 					market.bonds = market.bonds[num_bonds:]
-					# print(bid_agent.name, 'just bought', num_bonds, 'bonds, leaving', len(market.bonds), 'remaining in this tranche')
 					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche')
 
 				if len(market.bonds) == 0:
 					chat.update('market', 'all the bonds in this tranche have now been sold')
-					# print('all the bonds in this tranche have now been sold')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
@@ -227,29 +266,27 @@ def run_exchange(risk, time_remaining):
 			#make a copy so we can remove while we iterate
 			for index, ask in enumerate(market.ask_list):
 				ask_agent = next((agent for agent in agents if agent.name == ask.asker), None)
-				price = ask.price
-				if ask.est_return > bid.desired_return and ask.num > 0:
-					num_bonds = math.floor(bid.vol/price)
-					if num_bonds > 0:
-						if num_bonds > ask.num:
-							num_bonds = ask.num
+				price = market.price
+				if ask.num > 0:
+					if ask.est_return > bid.desired_return and ask.price < bid.price:
+						num_bonds = math.floor(bid.vol/price)
+						if num_bonds > 0:
+							if num_bonds > ask.num:
+								num_bonds = ask.num
 
-						# print('asker has', len(ask_agent.bonds), 'bidder has ', len(bid_agent.bonds))
-						bid_agent.bonds = bid_agent.bonds + ask_agent.bonds[:num_bonds]
-						bid_agent.funds = bid_agent.funds-price*num_bonds
+							# print('asker has', len(ask_agent.bonds), 'bidder has ', len(bid_agent.bonds))
+							bid_agent.bonds = bid_agent.bonds + ask_agent.bonds[:num_bonds]
+							bid_agent.funds = bid_agent.funds-price*num_bonds
 
-						ask_agent.bonds = ask_agent.bonds[num_bonds:]
-						ask_agent.funds = ask_agent.funds+price*num_bonds
+							ask_agent.bonds = ask_agent.bonds[num_bonds:]
+							ask_agent.funds = ask_agent.funds+price*num_bonds
 
-						#update the ask
-						ask.num = ask.num - num_bonds
+							#update the ask
+							ask.num = ask.num - num_bonds
 
-						#update the bid
-						bid.vol = bid.vol-price*num_bonds
+							#update the bid
+							bid.vol = bid.vol-price*num_bonds
 
-						print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
-						print(ask_agent.name, 'made a loss of', bid_agent.bonds[len(bid_agent.bonds)-1].initial_price*num_bonds - price*num_bonds)
-						chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
-
-	# server.update_market(market, agents)
+							print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
+							chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
 
