@@ -9,10 +9,7 @@ app = Flask(__name__)
 
 cors = CORS(app)
 hurricane = []
-market_object = {
-	'market': {},
-	'agents': []
-}
+market = {}
 
 def new_hurricane():
 	global hurricane
@@ -22,12 +19,9 @@ def new_point(p):
 	global hurricane
 	hurricane.append(p)
 
-def update_market(market, agents):
-	global market_object
-	market_object['market'] = market
-	market_object['agents'] = []
-	for agent in agents:
-		market_object['agents'].append(agent)
+def update_market(market_state):
+	global market
+	market = market_state
 
 @app.route("/userchat", methods=["POST"])
 def post_chat():
@@ -82,8 +76,8 @@ def get_hurricane():
 
 @app.route("/market", methods=["GET"])
 def get_market():
-	global market_object
-	return json.dumps(market_object, indent=4, sort_keys=True)
+	global market
+	return json.dumps(market, indent=4, sort_keys=True)
 
 
 @app.route("/", methods=["GET"])
