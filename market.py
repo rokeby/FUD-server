@@ -213,7 +213,8 @@ def loss_event():
 	global agents
 	for agent in agents:
 		if len(agent.bonds) > 0:
-			chat.update(agent.name, 'o shit o shit o shit')
+			#chat.loss_event goes here
+			chat.update(agent.name, 'o shit o shit o shit', 'agent')
 			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
 		agent.bonds = []
 
@@ -261,10 +262,10 @@ def run_exchange(risk, time_remaining):
 
 					#remove from the market
 					market.bonds = market.bonds[num_bonds:]
-					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche')
+					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche', 'market')
 
 				if len(market.bonds) == 0:
-					chat.update('market', 'all the bonds in this tranche have now been sold')
+					chat.update('market', 'all the bonds in this tranche have now been sold', 'market')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:
@@ -294,5 +295,5 @@ def run_exchange(risk, time_remaining):
 							bid.vol = bid.vol-price*num_bonds
 
 							print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
-							chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name))
+							chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name), 'market')
 

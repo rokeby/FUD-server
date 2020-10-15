@@ -34,7 +34,7 @@ def post_chat():
 		conn = sqlite3.connect(os.path.join(dirname, 'fud.db'))
 		c = conn.cursor()
 		with conn:
-			c.execute("INSERT INTO chat (user,chatString) VALUES (?,?)", (user, chat_string))
+			c.execute("INSERT INTO chat (user,chatString, entityType) VALUES (?,?,?)", (user, chat_string, 'person'))
 	except sqlite3.Error as e:
 		print(e)
 	finally:
@@ -56,7 +56,8 @@ def get_chat():
 				chat.append({
 					'timestamp': row[1],
 					'agent': row[2],
-					'chat': row[3]
+					'chat': row[3],
+					'entityType': row[4]
 				})
 		return json.dumps(chat, indent=4, sort_keys=True)
 

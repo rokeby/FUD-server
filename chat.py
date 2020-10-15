@@ -14,54 +14,56 @@ sell_chat = []
 outer_chat = []
 
 class OuterChat:
-	def __init__(self, unique_id, agent, phrase, tag, branch):
+	def __init__(self, unique_id, agent, phrase, tag, branch, entity_type):
 		self.unique_id = unique_id
 		self.agent = agent
 		self.phrase = phrase
 		self.tag = tag
 		self.branch = branch
+		self.entity_type = entity_type
 
 class Chat:
-	def __init__(self, agent, phrase):
+	def __init__(self, agent, phrase, entity_type):
 		self.agent = agent
 		self.phrase = phrase
+		self.entity_type = entity_type
 
 #load in chat csvs as objects
 def load_chats():
 	with open(os.path.join(dirname,'./chat_data/outer_loop.csv'), newline='') as f:
 		reader = csv.reader(f)
 		for row in reader:
-			outer_chat.append(OuterChat(row[0], row[1], row[2], row[3], row[4]))
+			outer_chat.append(OuterChat(row[0], row[1], row[2], row[3], row[4], 'agent'))
 
 	with open(os.path.join(dirname,'./chat_data/buying.csv'), 'r') as f:
 		reader = csv.reader(f)
 		for row in reader:
-			buy_chat.append(Chat(market.rand_agent().name, row[0]))
+			buy_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
 	with open(os.path.join(dirname,'./chat_data/selling.csv'), 'r') as f:
 		reader = csv.reader(f)
 		for row in reader:
-			sell_chat.append(Chat(market.rand_agent().name, row[0]))
+			sell_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
 def buying(agent):
 	global buy_chat
 	chat = random.choice(buy_chat)
-	update(agent, chat.phrase)
+	update(agent, chat.phrase, 'agent')
 	# print(agent, chat.phrase)
 
 def selling(agent):
 	global sell_chat
 	chat = random.choice(sell_chat)
-	update(agent, chat.phrase)
+	update(agent, chat.phrase, 'agent')
 	# print(agent, chat.phrase)
 
 def outer_loop(line, risk):
 	if line[3] == 'End' or line[3] == 'One':
-		update(line[1], line[2])
+		update(line[1], line[2], 'agent')
 		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*60))
 	else:
-		update(line[1], line[2])
+		update(line[1], line[2], 'agent')
 		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*10)+2)
 
@@ -79,7 +81,7 @@ def init_db():
 		c=conn.cursor()
 		c.execute('''DROP TABLE IF EXISTS chat''')
 		c.execute('''CREATE TABLE IF NOT EXISTS chat
-			(id INTEGER PRIMARY KEY, 'timestamp' DATETIME DEFAULT CURRENT_TIMESTAMP, user TEXT, chatString TEXT)''')
+			(id INTEGER PRIMARY KEY, 'timestamp' DATETIME DEFAULT CURRENT_TIMESTAMP, user TEXT, chatString TEXT, entityType TEXT)''')
 		print(sqlite3.version)
 	except sqlite3.Error as e:
 		print(e)
@@ -88,14 +90,14 @@ def init_db():
 			conn.close()
 
 
-def update(agent, chat_string):
+def update(agent, chat_string, entity_type):
 	global db_file
 	conn = None
 	try:
 		conn = sqlite3.connect(db_file)
 		c = conn.cursor()
 		with conn:
-			c.execute("INSERT INTO chat (user,chatString) VALUES (?,?)", (agent, chat_string))
+			c.execute("INSERT INTO chat (user,chatString,entityType) VALUES (?,?,?)", (agent, chat_string, entity_type))
 	except sqlite3.Error as e:
 		print(e)
 	finally:

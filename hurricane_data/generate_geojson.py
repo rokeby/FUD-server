@@ -13,9 +13,9 @@ from storm_classifier import classifier
 norm_factor=1
 
 class City(dict):
-	def __init__(self, name, country, region, pop, distance, risk_factor):
+	def __init__(self, name, country, region, pop, distance, risk_factor, lat, lon):
 		dict.__init__(self, name=name, country=country, region = region, 
-			pop = pop, distance = distance, risk_factor = risk_factor)
+			pop = pop, distance = distance, risk_factor = risk_factor, lat=lat, lon=lon)
 
 
 def normalise(list):
@@ -55,7 +55,7 @@ def get_proximity(lat, lon, name, cat, speed):
 			if dist <= radius:
 				pop = float(row[4])
 				risk_factor = ((500.0-dist)/500.0)*pop*cat['risk']*speed
-				proximity.append(City(row[2], row[0], row[3], pop, dist, risk_factor))
+				proximity.append(City(row[2], row[0], row[3], pop, dist, risk_factor, float(row[5]), float(row[6])))
 
 				if risk_factor > norm_factor:
 					norm_factor = risk_factor
