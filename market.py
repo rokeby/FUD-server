@@ -96,7 +96,7 @@ class Agent:
 				sellNum = len(self.bonds)
 				if sellNum > 0:
 					self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
-					# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
+					print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			eagerness = self.eagerness(risk)
@@ -198,7 +198,7 @@ def calculate_buy_sell_lists():
 
 
 		# market.update_price(sum_asks/len(market.ask_list) + sum_bids/len(market.ask_list))
-	print('market price for bonds is', market.price)
+	# print('market price for bonds is', market.price)
 
 
 
@@ -270,12 +270,11 @@ def run_exchange(risk, time_remaining):
 		#then, if there are asks
 		if len(market.ask_list) > 0:
 
-			#make a copy so we can remove while we iterate
 			for index, ask in enumerate(market.ask_list):
 				ask_agent = next((agent for agent in agents if agent.name == ask.asker), None)
 				price = market.price
 				if ask.num > 0:
-					if ask.est_return > bid.desired_return and ask.price < bid.price:
+					if ask.est_return > bid.desired_return and price < bid.price:
 						num_bonds = math.floor(bid.vol/price)
 						if num_bonds > 0:
 							if num_bonds > ask.num:

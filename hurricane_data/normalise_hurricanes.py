@@ -49,4 +49,4 @@ if __name__ == "__main__":
 	print('mean is', statistics.mean(risks))
 	print('mode is', statistics.mode(risks))
 	print('median is', statistics.median(risks))
-	print('top 15th percentile mean is', np.percentile(risks, 85))
+	print('top 15th percentile mean is', np.percentile(risks, 80))

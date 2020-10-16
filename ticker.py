@@ -32,7 +32,8 @@ time_remaining = periods_per_day*24
 # independently of the rest of the simulation
 def consult_oracle():
 	while True:
-		chat.update('oracle', oracle.consult(), 'oracle')
+		if (random.random() > 0.4): chat.update('oracle', oracle.weather(), 'oracle')
+		else: chat.update('sage', oracle.market(), 'oracle')
 		time.sleep(30*random.random())
 
 
@@ -86,10 +87,11 @@ def ticker():
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = helpers.add_noise(point['properties']['risk'])
+					print(risk)
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(30)
+					time.sleep(2)
 				# print('##storm ended')
 
 
@@ -127,6 +129,7 @@ if __name__ == "__main__":
 		outerLoop.daemon=True
 		outerLoop.start()
 
+		time.sleep(1)
 
 		# start oracle
 		commentary = threading.Thread(target=consult_oracle)

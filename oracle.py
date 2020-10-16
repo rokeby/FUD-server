@@ -1,12 +1,10 @@
 import tracery
 from tracery.modifiers import base_english
 
-rules = {
+weather_obj = {
    "origin":[
       "#intensity# #weatherType# #preposition# #place#, #verb2# #preposition2# #amount# of #quality#. #advice##endpunctuation#",
-      "The #water# #verb3# #adjective#. #advice#.",
-      "#what# #marketQuality# #marketObject##timeComment##question#",
-      "#futureAction# #if# #futureState#",
+      "The #water# #verb3# #adjective#. #advice#."
    ],
    
    "intensity":[
@@ -218,6 +216,13 @@ rules = {
    "endpunctuation":[
       ".",
       "?"
+   ]
+}
+
+market_obj = {
+   "origin":[
+      "#what# #marketQuality# #marketObject##timeComment##question#",
+      "#futureAction# #if# #futureState#",
    ],
 
    "what":[
@@ -349,13 +354,16 @@ rules = {
    ]
 }
 
-grammar = tracery.Grammar(rules)
-grammar.add_modifiers(base_english)
-
-def consult():
-	global grammar
+def market():
+	grammar = tracery.Grammar(market_obj)
+	grammar.add_modifiers(base_english)
 	response = grammar.flatten("#origin#")
 	print(response)
 	return response
 
-
+def weather():
+	grammar = tracery.Grammar(weather_obj)
+	grammar.add_modifiers(base_english)
+	response = grammar.flatten("#origin#")
+	print(response)
+	return response
