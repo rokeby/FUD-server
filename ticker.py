@@ -35,7 +35,7 @@ def chatter():
 		if (random.random() > 0.65): chat.update('oracle', oracle.weather(), 'oracle')
 		elif (random.random() > 0.33): chat.update('sage', oracle.market(), 'agent')
 		else: chat.chatter()
-		time.sleep(3*random.random())
+		time.sleep(30*random.random()+20)
 
 
 ###THREAD C
