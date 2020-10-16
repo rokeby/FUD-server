@@ -26,22 +26,32 @@ def update_market(market_state):
 
 @app.route("/userchat", methods=["POST"])
 def post_chat():
+	# u can't say that
+	block = False
+	blacklist = ["testblacklist", "nigger","nigga", "nigg", "fag", "faggot", "bitch", "whore", "retard", "cunt", "paki", "kike", "coon", "gook"]
 	user = request.form['user']
 	chat_string = request.form['chat_string']
-	print('adding to chat')
+	for word in blacklist:
+		if word in chat_string:
+			block = True
+			print('blocked')
 	conn = None
 	chat = []
-	try:
-		conn = sqlite3.connect(os.path.join(dirname, 'fud.db'))
-		c = conn.cursor()
-		with conn:
-			c.execute("INSERT INTO chat (user,chatString, entityType) VALUES (?,?,?)", (user, chat_string, 'person'))
-	except sqlite3.Error as e:
-		print(e)
-	finally:
-		if conn:
-			conn.close()
-	return 'chat'
+	if block == False :
+		print('adding to chat')
+		try:
+			conn = sqlite3.connect(os.path.join(dirname, 'fud.db'))
+			c = conn.cursor()
+			with conn:
+				c.execute("INSERT INTO chat (user,chatString, entityType) VALUES (?,?,?)", (user, chat_string, 'person'))
+		except sqlite3.Error as e:
+			print(e)
+		finally:
+			if conn:
+				conn.close()
+		return 'chat'
+	else:
+		return "you can't say that"
 
 
 @app.route("/email", methods=["POST"])
