@@ -123,10 +123,10 @@ def landfall():
 def outer_loop(line, risk):
 	if line[3] == 'End' or line[3] == 'One':
 		update(line[1], line[2], 'agent')
-		time.sleep(round(random.random()*60))
+		time.sleep(round(random.random()*60) + 80)
 	else:
 		update(line[1], line[2], 'agent')
-		time.sleep(round(random.random()*10)+2)
+		time.sleep(round(random.random()*20)+20)
 
 def chatter():
 	global generic_chat

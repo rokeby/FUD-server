@@ -35,7 +35,7 @@ def chatter():
 		if (random.random() > 0.65): chat.update('oracle', oracle.weather(), 'oracle')
 		elif (random.random() > 0.33): chat.update('sage', oracle.market(), 'agent')
 		else: chat.chatter()
-		time.sleep(30*random.random()+20)
+		time.sleep(40*random.random()+40)
 
 
 ###THREAD C
@@ -49,7 +49,7 @@ def outer_loop():
 			chat_lines = csv.reader(csvfile, delimiter=',')
 			for line in chat_lines:
 				while risk > 0.2:
-					time.sleep(10)
+					time.sleep(20)
 				chat.outer_loop(line, risk)
 
 ###THREAD B

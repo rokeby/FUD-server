@@ -8,7 +8,6 @@ import helpers
 import json
 import scipy.stats
 import numpy as np
-# from collections import namedtuple
 
 dirname = os.path.dirname(__file__)
 agents = []
