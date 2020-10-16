@@ -12,6 +12,11 @@ db_file = os.path.join(dirname, 'fud.db')
 buy_chat = []
 sell_chat = []
 outer_chat = []
+win_chat = []
+loss_chat = []
+landfall_chat = []
+prox_chat = []
+
 
 class OuterChat:
 	def __init__(self, unique_id, agent, phrase, tag, branch, entity_type):
@@ -45,6 +50,27 @@ def load_chats():
 		for row in reader:
 			sell_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
+	with open(os.path.join(dirname,'./chat_data/win.csv'), 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			win_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+
+	with open(os.path.join(dirname,'./chat_data/loss.csv'), 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			loss_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+
+	# with open(os.path.join(dirname,'./chat_data/prox.csv'), 'r') as f:
+	# 	reader = csv.reader(f)
+	# 	for row in reader:
+	# 		prox_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+
+	# with open(os.path.join(dirname,'./chat_data/landfall.csv'), 'r') as f:
+	# 	reader = csv.reader(f)
+	# 	for row in reader:
+	# 		landfall_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+
+
 def buying(agent):
 	global buy_chat
 	chat = random.choice(buy_chat)
@@ -57,20 +83,33 @@ def selling(agent):
 	update(agent, chat.phrase, 'agent')
 	# print(agent, chat.phrase)
 
+def win(agent):
+	global win_chat
+	chat = random.choice(win_chat)
+	update(agent, chat.phrase, 'agent')
+
+def loss(agent):
+	global loss_chat
+	chat = random.choice(loss_chat)
+	update(agent, chat.phrase, 'agent')
+
+def prox(city):
+	global prox_chat
+	chat = random.choice(prox_chat)
+	update(chat.agent, chat.phrase, 'agent')
+
+def landfall():
+	global landfall_chat
+	chat = random.choice(landfall_chat)
+	update(chat.agent, chat.phrase, 'agent')
+
 def outer_loop(line, risk):
 	if line[3] == 'End' or line[3] == 'One':
 		update(line[1], line[2], 'agent')
-		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*60))
 	else:
 		update(line[1], line[2], 'agent')
-		# print('######', line[1], line[2])
 		time.sleep(round(random.random()*10)+2)
-
-
-def market_chat(agents, hurricane, market):
-	print('talking about the market')
-
 
 
 def init_db():

@@ -30,7 +30,7 @@ time_remaining = periods_per_day*24
 
 # this thread controls the outer loop of the chat, which runs
 # independently of the rest of the simulation
-def consult_oracle():
+def chatter():
 	while True:
 		if (random.random() > 0.4): chat.update('oracle', oracle.weather(), 'oracle')
 		else: chat.update('sage', oracle.market(), 'oracle')
@@ -91,7 +91,7 @@ def ticker():
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(2)
+					time.sleep(30)
 				# print('##storm ended')
 
 
@@ -132,7 +132,7 @@ if __name__ == "__main__":
 		time.sleep(1)
 
 		# start oracle
-		commentary = threading.Thread(target=consult_oracle)
+		commentary = threading.Thread(target=chatter)
 		commentary.daemon=True
 		commentary.start()
 

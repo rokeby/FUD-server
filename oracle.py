@@ -328,7 +328,8 @@ market_obj = {
       "numbers are good",
       "fill up early",
       "buy buy",
-      "BUY HIGH"
+      "BUY HIGH",
+      "sell higher than you think"
    ],
 
    "if":[

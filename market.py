@@ -214,7 +214,7 @@ def loss_event():
 	for agent in agents:
 		if len(agent.bonds) > 0:
 			#chat.loss_event goes here
-			chat.update(agent.name, 'o shit o shit o shit', 'agent')
+			if random.random() > 0.4: chat.loss(agent.name)
 			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
 		agent.bonds = []
 
@@ -226,7 +226,8 @@ def reset_market(time_remaining):
 			for bond in agent.bonds:
 				payout = round(bond.initial_price + bond.yield_per_unit_time()*time_remaining, 2)
 				agent.funds = agent.funds + payout
-			# print('agent', agent.name, 'received', '$'+str(payout*len(agent.bonds)), 'payout')
+			print('win event')
+			if random.random() > 0.7: chat.win(agent.name)
 		agent.bid = None
 		agent.ask = None
 		agent.bonds = []
