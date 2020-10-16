@@ -91,7 +91,7 @@ class Agent:
 				desperation = self.desperation(risk)
 				for bond in self.bonds:
 					bond.update_price(bond.initial_price - bond.initial_price*desperation)
-				if random.random() > 0.85: 
+				if random.random() > 0.9: 
 					chat.selling(self.name)
 				sellNum = len(self.bonds)
 				if sellNum > 0:
@@ -100,7 +100,7 @@ class Agent:
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			eagerness = self.eagerness(risk)
-			if random.random() > 0.85:
+			if random.random() > 0.97:
 				chat.buying(self.name)
 			desired_return=1.05
 			self.bid = Bid(desired_return, eagerness*market.initial_price, self.buy_limit(), self.name)
