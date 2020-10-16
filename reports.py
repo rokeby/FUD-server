@@ -15,9 +15,10 @@ def track(point, sysName, time_remaining):
 	time = point['properties']['time']
 	lon = str(point['geometry']['coordinates'][0]) + 'E'
 	lat = str(point['geometry']['coordinates'][1]) + 'N'
-	chat.update(sysName, 'the time is ' + time + ' on '+ date.strftime('%m-%d') + ', location ' + lat + ', '+ lon, 'weather')
-	chat.update(sysName, 'max wind speed is '+ point['properties']['speed'] + ' knots', 'weather')
-	chat.update(sysName, 'this storm is now classified as a ' + point['properties']['report'], 'weather')
+	if time_remaining % 2 == 0:
+		chat.update(sysName, 'the time is ' + time + ' on '+ date.strftime('%m-%d') + ', location ' + lat + ', '+ lon, 'weather')
+		chat.update(sysName, 'max wind speed is '+ point['properties']['speed'] + ' knots', 'weather')
+		chat.update(sysName, 'this storm is now classified as a ' + point['properties']['report'], 'weather')
 
 	if time_remaining > 1:
 		time_remaining = time_remaining-1
