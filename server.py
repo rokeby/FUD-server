@@ -32,7 +32,7 @@ def post_chat():
 	user = request.form['user']
 	chat_string = request.form['chat_string']
 	for word in blacklist:
-		if word in chat_string:
+		if word in chat_string or word in user:
 			block = True
 			print('blocked')
 	conn = None
