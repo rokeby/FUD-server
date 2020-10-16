@@ -90,9 +90,14 @@ def ticker():
 					if point['properties']['landfall']: chat.landfall()
 					if risk >= 1:
 						market.loss_event()
+					elif point['properties']['risk'] >=0.6 and random.random() > 0.6:
+						if len(point['properties']['proximity']) > 0:
+							try:
+								chat.prox(point['properties']['proximity'][0])
+							except:
+								print("hit exception") 
 					market.yield_payout()
-					time.sleep(1)
-				# print('##storm ended')
+					time.sleep(30)
 
 
 if __name__ == "__main__":

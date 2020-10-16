@@ -3,6 +3,8 @@ import os
 import csv
 import time
 import random
+import re
+import unidecode
 
 import market
 
@@ -60,10 +62,10 @@ def load_chats():
 		for row in reader:
 			loss_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
-	# with open(os.path.join(dirname,'./chat_data/prox.csv'), 'r') as f:
-	# 	reader = csv.reader(f)
-	# 	for row in reader:
-	# 		prox_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+	with open(os.path.join(dirname,'./chat_data/prox.csv'), 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			prox_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
 	with open(os.path.join(dirname,'./chat_data/landfall.csv'), 'r') as f:
 		reader = csv.reader(f)
@@ -96,7 +98,16 @@ def loss(agent):
 def prox(city):
 	global prox_chat
 	chat = random.choice(prox_chat)
-	update(chat.agent, chat.phrase, 'agent')
+	name = city['name']
+	if random.random() > 0.4:
+		name = unidecode.unidecode(name)
+	if random.random() > 0.4:
+		name = name.lower()
+	phrase = re.sub('#name#', name, chat.phrase)
+	phrase = re.sub('#dist#', str(int(round(city['distance']))), phrase)
+	phrase = re.sub('#pop#', str(int(round(city['pop'], -3))), phrase)
+	print('!!!!!!!!', phrase)
+	update(chat.agent, phrase, 'agent')
 
 def landfall():
 	global landfall_chat
