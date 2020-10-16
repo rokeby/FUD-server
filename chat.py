@@ -18,6 +18,7 @@ win_chat = []
 loss_chat = []
 landfall_chat = []
 prox_chat = []
+generic_chat = []
 
 
 class OuterChat:
@@ -72,6 +73,11 @@ def load_chats():
 		for row in reader:
 			landfall_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
+	with open(os.path.join(dirname,'./chat_data/smalltalk.csv'), 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			generic_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+
 
 def buying(agent):
 	global buy_chat
@@ -122,6 +128,11 @@ def outer_loop(line, risk):
 		update(line[1], line[2], 'agent')
 		time.sleep(round(random.random()*10)+2)
 
+def chatter():
+	global generic_chat
+	chat = random.choice(generic_chat)
+	print(chat.agent, chat.phrase)
+	update(chat.agent, chat.phrase, 'agent')
 
 def init_db():
 	global db_file

@@ -32,9 +32,10 @@ time_remaining = periods_per_day*24
 # independently of the rest of the simulation
 def chatter():
 	while True:
-		if (random.random() > 0.4): chat.update('oracle', oracle.weather(), 'oracle')
-		else: chat.update('sage', oracle.market(), 'oracle')
-		time.sleep(30*random.random())
+		if (random.random() > 0.65): chat.update('oracle', oracle.weather(), 'oracle')
+		elif (random.random() > 0.33): chat.update('sage', oracle.market(), 'agent')
+		else: chat.chatter()
+		time.sleep(3*random.random())
 
 
 ###THREAD C
