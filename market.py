@@ -12,6 +12,7 @@ import numpy as np
 
 dirname = os.path.dirname(__file__)
 agents = []
+company_names = ['Eclipse Re Ltd. (Series 2020-04A)']
 
 #market sets price based on value?
 #value of a bid vs value of an ask
@@ -23,22 +24,27 @@ class Market:
 	initial_funds=0
 	current_funds=0
 
-	def __init__(self, initial_price):
+	def __init__(self, initial_price, issuing_company):
 		self.price = initial_price
 		self.initial_price = initial_price
+		self.issuing_company = issuing_company
 
 	def update_price(self, p):
 		self.price = round(p, 2)
 
-market = Market(100)
+	def add_company(self, company):
+		self.issuing_company = company
+
+market = Market(100, 'Eclipse Re Ltd. (Series 2020-04A)')
 
 #the owner of the bond determines their 'price'
 class Bond:
-	def __init__(self, initial_price, bond_yield, period):
+	def __init__(self, initial_price, bond_yield, period, company):
 		self.initial_price = initial_price
 		self.price = initial_price
 		self.bond_yield = bond_yield
 		self.bond_period = period
+		self.company = company
 
 	def yield_per_unit_time(self):
 		return (self.bond_yield*self.initial_price)/self.bond_period
@@ -127,11 +133,20 @@ class Agent:
 		eagerness = eagerness*math.sqrt(self.earnings() + 1)
 		return eagerness
 
+
+def load_companies():
+	global company_names
+	with open(os.path.join(dirname,'./companies.txt'), newline='') as f:
+		company_names = f.read().split('\n')
+
 def issue_bonds(price, bond_yield, num_bonds, bond_period):
 	global market
 	for b in range(0, num_bonds):
-		bond = Bond(price, bond_yield, bond_period)
+		bond = Bond(price, bond_yield, bond_period, market.issuing_company)
 		market.bonds.append(bond)
+	chat.update('market', '##### NEW CAT DROP #####', 'market')
+	chat.update('market', market.issuing_company + " has released a tranche of " + str(num_bonds) + " bonds", 'market')
+	print(market.issuing_company, "has released a tranche of", num_bonds, "bonds")
 
 def shuffle():
 	global agents, market
@@ -221,6 +236,7 @@ def loss_event():
 def reset_market(time_remaining):
 	global market, agents
 	market.bonds = []
+	market.add_company(random.choice(company_names))
 	for agent in agents:
 		if len(agent.bonds) > 0:
 			for bond in agent.bonds:
@@ -263,10 +279,11 @@ def run_exchange(risk, time_remaining):
 
 					#remove from the market
 					market.bonds = market.bonds[num_bonds:]
-					chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche', 'market')
+					if random.random() > 0.7:
+						chat.update('market', bid_agent.name + ' just bought ' + str(num_bonds) + ' bonds, leaving ' + str(len(market.bonds)) + ' remaining in this tranche', 'market')
 
 				if len(market.bonds) == 0:
-					chat.update('market', 'all the bonds in this tranche have now been sold', 'market')
+					chat.update('market', 'all the bonds in the ' + market.issuing_company + ' tranche have now been sold', 'market')
 
 		#then, if there are asks
 		if len(market.ask_list) > 0:

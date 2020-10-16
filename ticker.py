@@ -82,7 +82,7 @@ def ticker():
 				reports.new_hurricane(hurricane, sysName)
 				market.reset_market(time_remaining)
 				market.get_state()
-				market.issue_bonds(100, 0.5, 50, bond_period)
+				market.issue_bonds(100, 0.5, 40 + int(round(20*random.random())), bond_period)
 				server.new_hurricane()
 				for point in hurricane['geoJSON']['features']:
 					server.new_point(point)
@@ -106,6 +106,7 @@ if __name__ == "__main__":
 
 	#remove this before running on final version
 	market.create_agents()
+	market.load_companies()
 	chat.init_db()
 	chat.load_chats()
 
