@@ -65,10 +65,10 @@ def load_chats():
 	# 	for row in reader:
 	# 		prox_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
-	# with open(os.path.join(dirname,'./chat_data/landfall.csv'), 'r') as f:
-	# 	reader = csv.reader(f)
-	# 	for row in reader:
-	# 		landfall_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
+	with open(os.path.join(dirname,'./chat_data/landfall.csv'), 'r') as f:
+		reader = csv.reader(f)
+		for row in reader:
+			landfall_chat.append(Chat(market.rand_agent().name, row[0], 'agent'))
 
 
 def buying(agent):

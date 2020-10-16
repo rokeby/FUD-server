@@ -87,11 +87,11 @@ def ticker():
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = helpers.add_noise(point['properties']['risk'])
-					print(risk)
+					if point['properties']['landfall']: chat.landfall()
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(30)
+					time.sleep(1)
 				# print('##storm ended')
 
 
