@@ -88,10 +88,11 @@ def ticker():
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = helpers.add_noise(point['properties']['risk'])
-					if point['properties']['landfall']: chat.landfall()
+					if point['properties']['landfall']: 
+						chat.landfall()
 					if risk >= 1:
 						market.loss_event()
-					elif point['properties']['risk'] >=0.6 and random.random() > 0.6:
+					elif risk >=0.6:
 						if len(point['properties']['proximity']) > 0:
 							try:
 								chat.prox(point['properties']['proximity'][0])
@@ -104,10 +105,10 @@ def ticker():
 if __name__ == "__main__":
 	print("#### welcome to fud #####")
 
-	#remove this before running on final version
 	market.create_agents()
 	market.load_companies()
-	chat.init_db()
+	#remove this before running on final version
+	#chat.init_db()
 	chat.load_chats()
 
 	try:
