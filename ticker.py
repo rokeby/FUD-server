@@ -28,14 +28,14 @@ time_remaining = periods_per_day*24
 
 ###THREAD D
 
-# this thread controls the outer loop of the chat, which runs
+# this thread controls the small talk and oracles, which runs
 # independently of the rest of the simulation
 def chatter():
 	while True:
 		if (random.random() > 0.65): chat.update('oracle', oracle.weather(), 'oracle')
 		elif (random.random() > 0.33): chat.update('sage', oracle.market(), 'agent')
 		else: chat.chatter()
-		time.sleep(40*random.random()+40)
+		time.sleep(40*random.random()+80)
 
 
 ###THREAD C
@@ -92,7 +92,7 @@ def ticker():
 						chat.landfall()
 					if risk >= 1:
 						market.loss_event()
-					elif risk >=0.6:
+					elif risk >=0.5:
 						if len(point['properties']['proximity']) > 0:
 							try:
 								chat.prox(point['properties']['proximity'][0])

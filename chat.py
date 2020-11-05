@@ -112,7 +112,7 @@ def prox(city):
 	phrase = re.sub('#name#', name, chat.phrase)
 	phrase = re.sub('#dist#', str(int(round(city['distance']))), phrase)
 	phrase = re.sub('#pop#', str(int(round(city['pop'], -3))), phrase)
-	print('!!!!!!!!', phrase)
+	print('!!!!!!!!', phrase, chat.agent)
 	update(chat.agent, phrase, 'agent')
 
 def landfall():
@@ -123,10 +123,10 @@ def landfall():
 def outer_loop(line, risk):
 	if line[3] == 'End' or line[3] == 'One':
 		update(line[1], line[2], 'agent')
-		time.sleep(round(random.random()*60) + 80)
+		time.sleep(round(random.random()*150) + 200)
 	else:
 		update(line[1], line[2], 'agent')
-		time.sleep(round(random.random()*20)+20)
+		time.sleep(round(random.random()*100)+20)
 
 def chatter():
 	global generic_chat

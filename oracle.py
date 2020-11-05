@@ -359,12 +359,12 @@ def market():
 	grammar = tracery.Grammar(market_obj)
 	grammar.add_modifiers(base_english)
 	response = grammar.flatten("#origin#")
-	print(response)
+	# print(response)
 	return response
 
 def weather():
 	grammar = tracery.Grammar(weather_obj)
 	grammar.add_modifiers(base_english)
 	response = grammar.flatten("#origin#")
-	print(response)
+	# print(response)
 	return response
