@@ -1,5 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS
+import logging
 import sqlite3
 import json
 import os
@@ -7,6 +8,9 @@ import re
 
 dirname = os.path.dirname(__file__)
 app = Flask(__name__)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
 
 cors = CORS(app)
 hurricane = []
