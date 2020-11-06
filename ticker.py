@@ -31,13 +31,27 @@ time_remaining = periods_per_day*24
 # this thread controls the small talk and oracles, which runs
 # independently of the rest of the simulation
 def chatter():
+	global risk, currentPoint
 	while True:
-		while risk > 0.7:
-			time.sleep(20)
-		if (random.random() > 0.65): chat.update('oracle', oracle.weather(), 'oracle')
-		elif (random.random() > 0.33): chat.update('sage', oracle.market(), 'agent')
-		else: chat.chatter()
-		time.sleep(40*random.random()+80)
+		if risk > 0.6:
+			if len(currentPoint['properties']['proximity']) > 0:
+				try:
+					chat.prox(point['properties']['proximity'][0])
+				except:
+					print("hit exception")
+			time.sleep(round(20*random.random())+10)
+
+		elif (random.random() > 0.75):
+			chat.update('oracle', oracle.weather(), 'oracle')
+			time.sleep(round(40*random.random())+20)
+
+		elif (random.random() > 0.43):
+			chat.update('sage', oracle.market(), 'agent')
+			time.sleep(round(40*random.random())+20)
+
+		elif (random.random() > 0.1): 
+			chat.chatter()
+			time.sleep(round(50*random.random())+20)
 
 
 ###THREAD C
@@ -74,7 +88,7 @@ def trading():
 # commentary. At various points, this thread triggers the release
 # of tranches of hurricane bonds
 def ticker():
-	global risk, sysName, time_remaining
+	global risk, sysName, time_remaining, currentPoint
 	while True:
 		with open(os.path.join(dirname,'./hurricane_data/hurricanes-norm.json')) as file:
 			data = json.load(file)
@@ -87,6 +101,7 @@ def ticker():
 				market.issue_bonds(100, 0.5, 40 + int(round(20*random.random())), bond_period)
 				server.new_hurricane()
 				for point in hurricane['geoJSON']['features']:
+					currentPoint = point
 					server.new_point(point)
 					time_remaining = reports.track(point, sysName, time_remaining)
 					risk = helpers.add_noise(point['properties']['risk'])
@@ -94,14 +109,8 @@ def ticker():
 						chat.landfall()
 					if risk >= 1:
 						market.loss_event()
-					elif risk >=0.5:
-						if len(point['properties']['proximity']) > 0:
-							try:
-								chat.prox(point['properties']['proximity'][0])
-							except:
-								print("hit exception") 
 					market.yield_payout()
-					time.sleep(30)
+					time.sleep(1)
 
 
 if __name__ == "__main__":

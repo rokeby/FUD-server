@@ -101,7 +101,7 @@ class Agent:
 				sellNum = len(self.bonds)
 				if sellNum > 0:
 					self.ask = Ask(self.bonds[0].est_return(time_remaining), self.bonds[0].price, sellNum, self.name)
-					print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
+					# print(self.name, 'asks', self.ask.est_return, self.ask.price, self.ask.num)
 
 		elif risk < self.risk_mean + 1.0*self.risk_std and risk > self.risk_mean - 1.0*self.risk_std:
 			eagerness = self.eagerness(risk)
@@ -114,13 +114,13 @@ class Agent:
 		# desperation is the fraction of money you are willing to lose
 		# goes up to 70%
 		desp = (0.7/self.risk_std)*(risk - (self.risk_mean + 1.5*self.risk_std))**2
-		print('getting desperation', self.name, risk, self.risk_mean, self.risk_std, desp)
+		# print('getting desperation', self.name, risk, self.risk_mean, self.risk_std, desp)
 		return desp
 
 	def earnings(self):
 		# eagerness is how much you're wanting to buy a bond for, relative to ask price
 		earnings = (self.funds - self.initial_funds)/self.funds
-		if earnings != 0.0: print(self.name, 'current earnings are', round(earnings,2), '%')
+		# if earnings != 0.0: print(self.name, 'current earnings are', round(earnings,2), '%')
 		return earnings
 
 	def eagerness(self, risk):
@@ -229,7 +229,7 @@ def loss_event():
 		if len(agent.bonds) > 0:
 			#chat.loss_event goes here
 			if random.random() > 0.4: chat.loss(agent.name)
-			print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
+			# print('agent', agent.name, 'made a loss of', agent.bonds[0].initial_price*len(agent.bonds))
 		agent.bonds = []
 
 def reset_market(time_remaining):
@@ -241,7 +241,6 @@ def reset_market(time_remaining):
 			for bond in agent.bonds:
 				payout = round(bond.initial_price + bond.yield_per_unit_time()*time_remaining, 2)
 				agent.funds = agent.funds + payout
-			print('win event')
 			if random.random() > 0.7: chat.win(agent.name)
 		agent.bid = None
 		agent.ask = None
@@ -310,6 +309,6 @@ def run_exchange(risk, time_remaining):
 							#update the bid
 							bid.vol = bid.vol-price*num_bonds
 
-							print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
+							# print(ask_agent.name, 'sold', num_bonds, 'bonds to ', bid_agent.name, 'at', price)
 							chat.update('market', ask_agent.name + ' sold ' + str(num_bonds) + ' bonds to ' + str(bid_agent.name), 'market')
 
