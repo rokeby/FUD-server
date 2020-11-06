@@ -33,13 +33,12 @@ time_remaining = periods_per_day*24
 def chatter():
 	global risk, currentPoint
 	while True:
-		if risk > 0.6:
-			if len(currentPoint['properties']['proximity']) > 0:
-				try:
-					chat.prox(point['properties']['proximity'][0])
-				except:
-					print("hit exception")
-			time.sleep(round(20*random.random())+10)
+		if len(currentPoint['properties']['proximity']) > 0:
+			try:
+				chat.prox(point['properties']['proximity'][0])
+			except:
+				print("hit exception")
+		time.sleep(round(20*random.random())+10)
 
 		elif (random.random() > 0.75):
 			chat.update('oracle', oracle.weather(), 'oracle')
