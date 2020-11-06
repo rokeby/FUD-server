@@ -110,7 +110,7 @@ def ticker():
 					if risk >= 1:
 						market.loss_event()
 					market.yield_payout()
-					time.sleep(1)
+					time.sleep(30)
 
 
 if __name__ == "__main__":
