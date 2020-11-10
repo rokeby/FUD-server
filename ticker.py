@@ -38,13 +38,13 @@ def chatter():
 				chat.prox(point['properties']['proximity'][0])
 			except:
 				print("hit exception")
-		time.sleep(round(20*random.random())+10)
+			time.sleep(round(20*random.random())+10)
 
-		elif (random.random() > 0.75):
+		elif (random.random() > 0.85):
 			chat.update('oracle', oracle.weather(), 'oracle')
 			time.sleep(round(40*random.random())+20)
 
-		elif (random.random() > 0.43):
+		elif (random.random() > 0.7):
 			chat.update('sage', oracle.market(), 'agent')
 			time.sleep(round(40*random.random())+20)
 
